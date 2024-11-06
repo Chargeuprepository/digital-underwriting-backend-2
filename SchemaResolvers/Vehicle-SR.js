@@ -1,5 +1,5 @@
 import { gql } from "graphql-tag";
-import RCDetails from "../APIs/vehicleAPI.js";
+import vehicleAPI from "../APIs/vehicleAPI.js";
 
 export const vehicleTypeDefs = gql`
   type Vehicle {
@@ -64,7 +64,7 @@ export const vehicleTypeDefs = gql`
 export const vehicleResolvers = {
   Query: {
     vehicle: async (_, { registrationNumber }) => {
-      const vehicleData = await RCDetails(registrationNumber);
+      const vehicleData = await vehicleAPI(registrationNumber);
       return {
         owner: {
           name: vehicleData.ownerName,

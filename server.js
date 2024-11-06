@@ -1,9 +1,6 @@
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
-// import { typeDefs } from "./schema.js";
-// import { resolvers } from "./resolvers.js";
-import { typeDefs } from "./SchemaResolvers/Parent-SRs/Parent-SR.js";
-import { resolvers } from "./SchemaResolvers/Parent-SRs/Parent-SR.js";
+import { typeDefs, resolvers } from "./SchemaResolvers/Parent-SRs/parent-SR.js";
 
 export const app = express();
 const server = new ApolloServer({ typeDefs, resolvers });

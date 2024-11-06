@@ -1,9 +1,11 @@
 import axios from "axios";
 import https from "https";
 
-export default async function vehicleAPI(registrationNumber) {
-  const url = "https://api.sandbox.bureau.id/v2/services/rc-authentication";
+export default async function creditAPI(creditParams) {
+  const url =
+    "https://api.sandbox.bureau.id/v2/services/credit-report-generation";
   const options = {
+    method: "POST",
     headers: {
       accept: "application/json",
       "content-type": "application/json",
@@ -16,15 +18,11 @@ export default async function vehicleAPI(registrationNumber) {
   };
 
   try {
-    const response = await axios.post(
-      url,
-      { docNumber: registrationNumber },
-      options
-    );
-    return response.data;
-    // res.json({ data: response.data });
+    const response = await axios.post(url, creditParams, options);
+    // return JSON.stringify(response.data);
+    return response;
   } catch (error) {
     console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
+    response.status(500).json({ error: "Failed to fetch data" });
   }
 }

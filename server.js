@@ -11,3 +11,9 @@ server.start().then(() => {
     console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
   );
 });
+
+// import { app } from "./app.js";
+
+// app.listen(8000, (req, res) => {
+//   console.log("server is listening at port 8000");
+// });

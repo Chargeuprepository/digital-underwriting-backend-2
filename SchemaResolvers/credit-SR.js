@@ -197,12 +197,11 @@ export const creditResolvers = {
   Query: {
     credit: async (_, { input }) => {
       const creditData = await creditAPI(input);
-      //   console.log(creditData.data);
       return {
-        INProfileResponse: creditData.data.processReturn.INProfileResponse,
-        requestId: creditData.data.requestId,
-        statusCode: creditData.data.statusCode,
-        timestamp: creditData.data.timestamp,
+        INProfileResponse: creditData.processReturn.INProfileResponse,
+        requestId: creditData.requestId,
+        statusCode: creditData.statusCode,
+        timestamp: creditData.timestamp,
       };
     },
   },

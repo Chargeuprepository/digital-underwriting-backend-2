@@ -77,6 +77,8 @@ app.post("/riskScore", async (req, res) => {
       email: "gauravjoshi7060331206@gmail.com",
       name: "gaurav joshi",
       phoneNumber: "918287289204",
+      derivedSignals: true,
+      enhancedCoverage: true,
     },
   };
 

@@ -1,7 +1,7 @@
 import axios from "axios";
 import https from "https";
 
-export default async function riskAPI() {
+export default async function riskAPI(input) {
   const url = "https://api.sandbox.bureau.id/transactions";
   const options = {
     headers: {
@@ -15,12 +15,14 @@ export default async function riskAPI() {
   };
 
   let data = {
-    workflowId: "f3009b74-f67c-479c-b493-122be98ca20b",
+    workflowId: input.workflowId,
     data: {
       countryCode: "IND",
-      email: "gauravjoshi7060331206@gmail.com",
-      name: "gaurav joshi",
-      phoneNumber: "918287289204",
+      email: input.data.email,
+      phoneNumber: input.data.phoneNumber,
+      name: input.data.name,
+      derivedSignals: true,
+      enhancedCoverage: true,
     },
   };
 
@@ -44,5 +46,4 @@ export default async function riskAPI() {
       console.error("Error:", error);
     });
   return response2.data;
-  //   res.json({ data: response2.data });
 }

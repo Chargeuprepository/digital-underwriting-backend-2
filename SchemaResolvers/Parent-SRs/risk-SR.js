@@ -338,30 +338,35 @@ export const riskTypeDefs = gql`
   type DigitalBehaviour {
     affluenceScore: Float
     digitalPaymentScore: Float
+    eCommerceScore: Float
     socialMediaScore: Float
-    trustScore: Float
+    workUtilityScore: Float
   }
 
   type RiskScores {
-    fraudScore: Int
-    phoneRiskScore: Int
-    riskScore: Int
+    alternateRiskScore: Int
   }
 
   type Awaits {
-    status: String
-    response: AwaitsResponse
+    emailSocialCombinedReport: AwaitsResponse
+    phoneSocialCombinedReport: AwaitsResponse
   }
 
   type AwaitsResponse {
-    awaitTime: String
-    startTime: Float
-    error: String
+    status: String
+    response: AwaitsResponseEmailPhone
+  }
+
+  type AwaitsResponseEmailPhone {
+    awaitedOnThis: Boolean
+    data: [String]
   }
 
   type TransactionRawInput {
-    inputData: String
-    rawData: String
+    countryCode: String
+    email: String
+    name: String
+    phoneNumber: String
   }
 `;
 
@@ -369,7 +374,7 @@ export const riskResolvers = {
   Query: {
     risk: async (_, { input }) => {
       const riskData = await riskAPI(input);
-      console.log(riskData.services["Email Social Combined Submit"]);
+      // console.log(riskData.awaits);
       return {
         statusCode: riskData.statusCode,
         error: riskData.error,
@@ -396,7 +401,12 @@ export const riskResolvers = {
             riskData.services["Phone Social Combined Submit"],
           riskModel: riskData.services["Risk Model"],
         },
-        awaits: riskData.awaits,
+        awaits: {
+          emailSocialCombinedReport:
+            riskData.awaits["Email Social Combined Report"],
+          phoneSocialCombinedReport:
+            riskData.awaits["Phone Social Combined Report"],
+        },
         outcomeReasons: riskData.outcomeReasons,
         transactionRawInput: riskData.transactionRawInput,
         documents: riskData.documents,

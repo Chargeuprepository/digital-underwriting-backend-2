@@ -3,9 +3,8 @@ import creditAPI from "../APIs/creditAPI.js";
 
 export const creditTypeDefs = gql`
   type Query {
-    credit(input: ApplicantInput!): ProcessReturn
+    credit(input: ApplicantInput!): CreditData
   }
-
   input ApplicantInput {
     firstName: String!
     lastName: String!
@@ -19,189 +18,162 @@ export const creditTypeDefs = gql`
     state: String!
     pinCode: String!
   }
-  type ProcessReturn {
-    INProfileResponse: INProfileResponse
+  type CreditData {
     requestId: String
     statusCode: Int
     timestamp: Float
+    INProfileResponse: INProfileResponse
   }
 
   type INProfileResponse {
-    CAIS_Account: CAISAccount
-    CAPS: CAPS
-    CreditProfileHeader: CreditProfileHeader
-    Current_Application: CurrentApplication
-    Header: Header
-    Match_result: MatchResult
-    NonCreditCAPS: NonCreditCAPS
-    SCORE: Score
-    TotalCAPS_Summary: TotalCAPS
-    UserMessage: UserMessage
+    header: Header
+    hero: Hero
+    personalDetails: PersonalDetails
+    applicationDetails: ApplicationDetails
+    capsSummary: CapsSummary
+    otherDetails: OtherDetails
   }
-
-  type CAISAccount {
-    CAIS_Summary: CAISSummary
-  }
-
-  type CAISSummary {
-    Credit_Account: CreditAccount
-    Total_Outstanding_Balance: OutstandingBalance
-  }
-
-  type CreditAccount {
-    CADSuitFiledCurrentBalance: Int
-    CreditAccountActive: Int
-    CreditAccountClosed: Int
-    CreditAccountDefault: Int
-    CreditAccountTotal: Int
-  }
-
-  type OutstandingBalance {
-    Outstanding_Balance_All: Int
-    Outstanding_Balance_Secured: Int
-    Outstanding_Balance_Secured_Percentage: Int
-    Outstanding_Balance_UnSecured: Int
-    Outstanding_Balance_UnSecured_Percentage: Int
-  }
-
-  type CAPS {
-    CAPS_Summary: CAPSSummary
-  }
-
-  type CAPSSummary {
-    CAPSLast180Days: Int
-    CAPSLast30Days: Int
-    CAPSLast7Days: Int
-    CAPSLast90Days: Int
-  }
-
-  type CreditProfileHeader {
-    CustomerReferenceID: String
-    Enquiry_Username: String
-    ReportDate: Int
-    ReportNumber: Float
-    ReportTime: Int
-    Subscriber: String
-    Subscriber_Name: String
-    Version: String
-  }
-
-  type CurrentApplication {
-    Current_Application_Details: CurrentApplicationDetails
-  }
-
-  type CurrentApplicationDetails {
-    Amount_Financed: Int
-    Current_Applicant_Additional_AddressDetails: String
-    Current_Applicant_Address_Details: AddressDetails
-    Current_Applicant_Details: ApplicantDetails
-    Current_Other_Details: OtherDetails
-    Duration_Of_Agreement: Int
-    Enquiry_Reason: Int
-    Finance_Purpose: Int
-  }
-
-  type AddressDetails {
-    BldgNoSocietyName: String
-    City: String
-    Country_Code: String
-    FlatNoPlotNoHouseNo: String
-    Landmark: String
-    PINCode: Int
-    RoadNoNameAreaLocality: String
-    State: Int
-  }
-
-  type ApplicantDetails {
-    Date_Of_Birth_Applicant: Int
-    Driver_License_Expiration_Date: String
-    Driver_License_Issue_Date: String
-    Driver_License_Number: String
-    EMailId: String
-    First_Name: String
-    Gender_Code: Int
-    IncomeTaxPan: String
-    Last_Name: String
-    Middle_Name1: String
-    Middle_Name2: String
-    Middle_Name3: String
-    MobilePhoneNumber: String
-    PAN_Expiration_Date: String
-    PAN_Issue_Date: String
-    Passport_Expiration_Date: String
-    Passport_Issue_Date: String
-    Passport_Number: String
-    Ration_Card_Expiration_Date: String
-    Ration_Card_Issue_Date: String
-    Ration_Card_Number: String
-    Telephone_Extension: String
-    Telephone_Number_Applicant_1st: Int
-    Telephone_Type: String
-    Universal_ID_Expiration_Date: String
-    Universal_ID_Issue_Date: String
-    Universal_ID_Number: String
-    Voter_ID_Expiration_Date: String
-    Voter_ID_Issue_Date: String
-    Voter_s_Identity_Card: String
-  }
-
-  type OtherDetails {
-    Employment_Status: String
-    Income: Int
-    Marital_Status: String
-    Number_of_Major_Credit_Card_Held: Int
-    Policy: String
-    Time_with_Employer: String
-  }
-
   type Header {
-    MessageText: String
-    ReportDate: Int
-    ReportTime: Int
-    SystemCode: Int
+    name: String
+    mobile: String
   }
-
-  type MatchResult {
-    Exact_match: String
+  type Hero {
+    creditScore: Int
+    outstandingBalance: Int
+    accountsActive: Int
+    accountsDefault: Int
   }
-
-  type NonCreditCAPS {
-    NonCreditCAPS_Summary: NonCreditCAPSSummary
+  type PersonalDetails {
+    dateOfBirth: Int
+    firstName: String
+    genderCode: Int
+    PANNumber: String
+    lastName: String
+    mobile: String
   }
-
-  type NonCreditCAPSSummary {
-    NonCreditCAPSLast180Days: Int
-    NonCreditCAPSLast30Days: Int
-    NonCreditCAPSLast7Days: Int
-    NonCreditCAPSLast90Days: Int
+  type ApplicationDetails {
+    amountFinanced: Int
+    buildingSociety: String
+    city: String
+    countryCode: String
+    flatPlotHouseNumber: String
+    landmark: String
+    pinCode: String
+    roadAreaLocality: String
+    state: Int
   }
-
-  type Score {
-    BureauScore: Int
-    BureauScoreConfidLevel: String
+  type CapsSummary {
+    capsLast180Days: Int
+    capsLast90Days: Int
+    capsLast30Days: Int
+    capsLast7Days: Int
+    nonCreditCapsLast180Days: Int
+    nonCreditCapsLast90Days: Int
+    nonCreditCapsLast30Days: Int
+    nonCreditCapsLast7Days: Int
+    totalCapsLast180Days: Int
+    totalCapsLast90Days: Int
+    totalCapsLast30Days: Int
+    totalCapsLast7Days: Int
   }
-
-  type TotalCAPS {
-    TotalCAPSLast180Days: Int
-    TotalCAPSLast30Days: Int
-    TotalCAPSLast7Days: Int
-    TotalCAPSLast90Days: Int
-  }
-
-  type UserMessage {
-    UserMessageText: String
+  type OtherDetails {
+    employmentStatus: String
+    income: Int
+    maritalStatus: String
+    numberOfMajorCreditCardHeld: Int
+    policy: String
+    timeWithEmployer: String
   }
 `;
 
 export const creditResolvers = {
   Query: {
     credit: async (_, { input }) => {
+      // console.log(input);
       const creditData = await creditAPI(input);
+      console.log(creditData);
+      const applicantDetails =
+        creditData.processReturn.INProfileResponse.Current_Application
+          .Current_Application_Details.Current_Applicant_Details;
+      const CAISSummary =
+        creditData.processReturn.INProfileResponse.CAIS_Account.CAIS_Summary;
+      const applicationDetails =
+        creditData.processReturn.INProfileResponse.Current_Application
+          .Current_Application_Details.Current_Applicant_Address_Details;
+      const caps = creditData.processReturn.INProfileResponse.CAPS.CAPS_Summary;
+      const nonCreditCaps =
+        creditData.processReturn.INProfileResponse.NonCreditCAPS
+          .NonCreditCAPS_Summary;
+      const capsSummary =
+        creditData.processReturn.INProfileResponse.TotalCAPS_Summary;
+      const currentApplicationDetails =
+        creditData.processReturn.INProfileResponse.Current_Application
+          .Current_Application_Details.Current_Other_Details;
+
       return {
-        INProfileResponse: creditData.processReturn.INProfileResponse,
         requestId: creditData.requestId,
         statusCode: creditData.statusCode,
         timestamp: creditData.timestamp,
+        INProfileResponse: {
+          header: {
+            name: `${applicantDetails.First_Name}${" "}${
+              applicantDetails.Last_Name
+            }`,
+            mobile: applicantDetails.MobilePhoneNumber,
+          },
+          hero: {
+            creditScore:
+              creditData.processReturn.INProfileResponse.SCORE.BureauScore,
+            outstandingBalance:
+              CAISSummary.Total_Outstanding_Balance.Outstanding_Balance_All,
+            accountsActive: CAISSummary.Credit_Account.CreditAccountActive,
+            accountsDefault: CAISSummary.Credit_Account.CreditAccountDefault,
+          },
+          personalDetails: {
+            dateOfBirth: applicantDetails.Date_Of_Birth_Applicant,
+            firstName: applicantDetails.First_Name,
+            genderCode: applicantDetails.Gender_Code,
+            PANNumber: applicantDetails.IncomeTaxPan,
+            lastName: applicantDetails.Last_Name,
+            mobile: applicantDetails.MobilePhoneNumber,
+          },
+          applicationDetails: {
+            amountFinanced:
+              creditData.processReturn.INProfileResponse.Current_Application
+                .Current_Application_Details.Amount_Financed,
+            buildingSociety: applicationDetails.BldgNoSocietyName,
+            city: applicationDetails.city,
+            countryCode: applicationDetails.Country_Code,
+            flatPlotHouseNumber: applicationDetails.FlatNoPlotNoHouseNo,
+            landmark: applicationDetails.Landmark,
+            pinCode: applicationDetails.PINCode,
+            roadAreaLocality: applicationDetails.RoadNoNameAreaLocality,
+            state: applicationDetails.State,
+          },
+          capsSummary: {
+            capsLast180Days: caps.CAPSLast180Days,
+            capsLast90Days: caps.CAPSLast90Days,
+            capsLast30Days: caps.CAPSLast30Days,
+            capsLast7Days: caps.CAPSLast7Days,
+            nonCreditCapsLast180Days: nonCreditCaps.NonCreditCAPSLast180Days,
+            nonCreditCapsLast90Days: nonCreditCaps.NonCreditCAPSLast90Days,
+            nonCreditCapsLast30Days: nonCreditCaps.NonCreditCAPSLast30Days,
+            nonCreditCapsLast7Days: nonCreditCaps.NonCreditCAPSLast7Days,
+            totalCapsLast180Days: capsSummary.TotalCAPSLast180Days,
+            totalCapsLast90Days: capsSummary.TotalCAPSLast90Days,
+            totalCapsLast30Days: capsSummary.TotalCAPSLast30Days,
+            totalCapsLast7Days: capsSummary.TotalCAPSLast7Days,
+          },
+          otherDetails: {
+            employmentStatus: currentApplicationDetails.Employment_Status,
+            income: currentApplicationDetails.Income,
+            maritalStatus: currentApplicationDetails.Marital_Status,
+            numberOfMajorCreditCardHeld:
+              currentApplicationDetails.Number_of_Major_Credit_Card_Held,
+            policy: currentApplicationDetails.Policy,
+            timeWithEmployer: currentApplicationDetails.Time_with_Employer,
+          },
+        },
       };
     },
   },

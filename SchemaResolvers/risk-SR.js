@@ -1,5 +1,5 @@
 import { gql } from "apollo-server-express";
-import riskAPI from "../../APIs/riskAPI.js";
+import riskAPI from "../APIs/riskAPI.js";
 
 export const riskTypeDefs = gql`
   type Query {

@@ -39,9 +39,8 @@ export const vehicleTypeDefs = gql`
   type Registration {
     registrationNumber: String
     registrationDate: String
-    registeredAtRTO: String
+    registeredAt: String
     fitnessUpto: String
-    rcStatus: String
   }
 
   type Insurance {
@@ -65,15 +64,19 @@ export const vehicleTypeDefs = gql`
   }
 
   type Query {
-    vehicle(registrationNumber: String!): Vehicle
+    vehicle(input: RegistrationNumber): Vehicle
+  }
+  input RegistrationNumber {
+    rcNumber: String
   }
 `;
 
 export const vehicleResolvers = {
   Query: {
-    vehicle: async (_, { registrationNumber }) => {
-      const vehicleData = await vehicleAPI(registrationNumber);
-      // console.log(vehicleData.status);
+    vehicle: async (_, { input }) => {
+      console.log(input);
+      const vehicleData = await vehicleAPI(input);
+      // console.log(vehicleData);
       return {
         statusCode: vehicleData.statusCode,
         headerData: {
@@ -87,7 +90,7 @@ export const vehicleResolvers = {
           fatherName: vehicleData.fatherName,
           permanentAddress: vehicleData.permanentAddress,
           presentAddress: vehicleData.presentAddress,
-          mobileNumber: vehicleData.rcMobileNo,
+          rcMobileNo: vehicleData.rcMobileNo,
         },
         vehicleInformation: {
           chassisNumber: vehicleData.chassisNumber,
@@ -99,9 +102,8 @@ export const vehicleResolvers = {
         registration: {
           registrationNumber: vehicleData.registrationNumber,
           registrationDate: vehicleData.registrationDate,
-          registeredAtRTO: vehicleData.registeredAtRTO,
+          registeredAt: vehicleData.registeredAt,
           fitnessUpto: vehicleData.fitnessUpto,
-          rcStatus: vehicleData.status,
         },
         insurance: {
           insuranceCompany: vehicleData.insuranceCompany,

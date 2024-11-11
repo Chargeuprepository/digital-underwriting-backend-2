@@ -1,7 +1,7 @@
 import { gql } from "graphql-tag";
 import { vehicleResolvers, vehicleTypeDefs } from "../vehicle-SR.js";
 import { creditResolvers, creditTypeDefs } from "../credit-SR.js";
-import { riskTypeDefs, riskResolvers } from "./risk-SR.js";
+import { riskTypeDefs, riskResolvers } from "../risk-SR.js";
 
 const typeDefs = gql`
   ${vehicleTypeDefs}

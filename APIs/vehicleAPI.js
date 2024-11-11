@@ -18,7 +18,7 @@ export default async function vehicleAPI(registrationNumber) {
   try {
     const response = await axios.post(
       url,
-      { docNumber: registrationNumber },
+      { docNumber: registrationNumber.rcNumber },
       options
     );
     return response.data;

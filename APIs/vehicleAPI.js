@@ -24,7 +24,7 @@ export default async function vehicleAPI(registrationNumber) {
     return response.data;
     // res.json({ data: response.data });
   } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
+    // console.error("Error fetching data:", error);
+    return error;
   }
 }

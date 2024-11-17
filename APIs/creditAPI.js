@@ -19,7 +19,6 @@ export default async function creditAPI(creditParams) {
 
   try {
     const response = await axios.post(url, creditParams, options);
-    console.log(response);
     return response.data;
   } catch (error) {
     console.error("Error fetching data:", error);

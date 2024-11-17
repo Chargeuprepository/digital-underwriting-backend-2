@@ -1,5 +1,6 @@
 import { gql } from "apollo-server-express";
 import creditAPI from "../APIs/creditAPI.js";
+import dateFormat from "../Helper/dateFormat.js";
 
 export const creditTypeDefs = gql`
   type Query {
@@ -28,6 +29,7 @@ export const creditTypeDefs = gql`
   type INProfileResponse {
     header: Header
     hero: Hero
+    accountSummary: AccountSummary
     personalDetails: PersonalDetails
     applicationDetails: ApplicationDetails
     capsSummary: CapsSummary
@@ -44,7 +46,7 @@ export const creditTypeDefs = gql`
     accountsDefault: Int
   }
   type PersonalDetails {
-    dateOfBirth: Int
+    dateOfBirth: String
     firstName: String
     genderCode: Int
     PANNumber: String
@@ -84,14 +86,23 @@ export const creditTypeDefs = gql`
     policy: String
     timeWithEmployer: String
   }
+  type AccountSummary {
+    creditScore: Int
+    cadSuitFiledCurrentBalance: Int
+    creditAccountActive: Int
+    creditAccountClosed: Int
+    creditAccountDefault: Int
+    creditAccountTotal: Int
+    outstandingBalanceAll: Int
+    outstandingBalanceSecured: Int
+    outstandingBalanceUnsecured: Int
+  }
 `;
 
 export const creditResolvers = {
   Query: {
     credit: async (_, { input }) => {
-      // console.log(input);
       const creditData = await creditAPI(input);
-      console.log(creditData);
       const applicantDetails =
         creditData.processReturn.INProfileResponse.Current_Application
           .Current_Application_Details.Current_Applicant_Details;
@@ -109,6 +120,12 @@ export const creditResolvers = {
       const currentApplicationDetails =
         creditData.processReturn.INProfileResponse.Current_Application
           .Current_Application_Details.Current_Other_Details;
+      const creditAccount =
+        creditData.processReturn.INProfileResponse.CAIS_Account.CAIS_Summary
+          .Credit_Account;
+      const totalOutstandingBalance =
+        creditData.processReturn.INProfileResponse.CAIS_Account.CAIS_Summary
+          .Total_Outstanding_Balance;
 
       return {
         requestId: creditData.requestId,
@@ -130,7 +147,7 @@ export const creditResolvers = {
             accountsDefault: CAISSummary.Credit_Account.CreditAccountDefault,
           },
           personalDetails: {
-            dateOfBirth: applicantDetails.Date_Of_Birth_Applicant,
+            dateOfBirth: dateFormat(applicantDetails.Date_Of_Birth_Applicant),
             firstName: applicantDetails.First_Name,
             genderCode: applicantDetails.Gender_Code,
             PANNumber: applicantDetails.IncomeTaxPan,
@@ -172,6 +189,22 @@ export const creditResolvers = {
               currentApplicationDetails.Number_of_Major_Credit_Card_Held,
             policy: currentApplicationDetails.Policy,
             timeWithEmployer: currentApplicationDetails.Time_with_Employer,
+          },
+          accountSummary: {
+            creditScore:
+              creditData.processReturn.INProfileResponse.SCORE.BureauScore,
+            cadSuitFiledCurrentBalance:
+              creditAccount.CADSuitFiledCurrentBalance,
+            creditAccountActive: creditAccount.CreditAccountActive,
+            creditAccountClosed: creditAccount.CreditAccountClosed,
+            creditAccountDefault: creditAccount.CreditAccountDefault,
+            creditAccountTotal: creditAccount.CreditAccountTotal,
+            outstandingBalanceAll:
+              totalOutstandingBalance.Outstanding_Balance_All,
+            outstandingBalanceSecured:
+              totalOutstandingBalance.Outstanding_Balance_Secured,
+            outstandingBalanceUnsecured:
+              totalOutstandingBalance.Outstanding_Balance_UnSecured,
           },
         },
       };

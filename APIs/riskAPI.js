@@ -14,31 +14,35 @@ export default async function riskAPI(input) {
     }),
   };
 
-  let data = {
-    workflowId: input.workflowId,
+  let apiInput = {
+    workflowId: "f3009b74-f67c-479c-b493-122be98ca20b",
     data: {
       countryCode: "IND",
-      email: input.data.email,
-      phoneNumber: input.data.phoneNumber,
-      name: input.data.name,
+      // email: input.email,
+      phoneNumber: input.phoneNumber,
+      name: input.name,
       derivedSignals: true,
       enhancedCoverage: true,
     },
   };
 
   const response1 = await axios
-    .post(url, data, options)
+    .post(url, apiInput, options)
     .then((response) => {
       return response;
     })
     .catch((error) => {
       console.error("Error:", error);
+      return error;
     });
 
-  data = { transactionId: response1.data.transactionId, ...data };
+  apiInput = {
+    transactionId: response1.data?.transactionId,
+    ...apiInput,
+  };
 
   const response2 = await axios
-    .post(url, data, options)
+    .post(url, apiInput, options)
     .then((response) => {
       return response;
     })

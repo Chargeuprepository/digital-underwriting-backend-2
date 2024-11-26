@@ -1,13 +1,14 @@
 import axios from "axios";
 import https from "https";
+import redisClient from "../redisClient.js";
 
 export default async function riskAPI(input) {
-  const url = "https://api.sandbox.bureau.id/transactions";
+  const url = "https://api.bureau.id/transactions";
   const options = {
     headers: {
       "Content-Type": "application/json",
-      Authorization:
-        "Basic NzZmYjczMzctOWJiYy00YTA4LWE2ZGEtNTQxZGNiYzBhY2UwOjk3OGJhYWE3LWY3YzctNGQ0Yy05ZTcyLTJlODI1NmJmZGQ1Yw==",
+      authorization:
+        "Basic OWM4ZTFjNzYtNDViOS00ZDU2LWJkNDAtNzhmMmNlZGVhYmQ5OmEzMDE0MzNkLTYzODMtNDY5ZS1iN2I3LTUxNWM1MzcxNzgzNA==",
     },
     httpsAgent: new https.Agent({
       rejectUnauthorized: false,
@@ -15,7 +16,7 @@ export default async function riskAPI(input) {
   };
 
   let apiInput = {
-    workflowId: "f3009b74-f67c-479c-b493-122be98ca20b",
+    workflowId: "d7b8d856-5bee-41be-b234-3faf9b4cb9d9",
     data: {
       countryCode: "IND",
       // email: input.email,

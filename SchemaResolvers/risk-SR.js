@@ -109,7 +109,7 @@ export const riskTypeDefs = gql`
 export const riskResolvers = {
   Query: {
     risk: async (_, { input }) => {
-      console.log(input);
+      // console.log(input);
       const riskData = await riskAPI(input);
       // console.log(riskData);
 

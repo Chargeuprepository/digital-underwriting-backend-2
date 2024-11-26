@@ -64,7 +64,7 @@ export const vehicleTypeDefs = gql`
   }
 
   type Query {
-    vehicle(input: RegistrationNumber): Vehicle
+    vehicle(input: RegistrationNumber!): Vehicle
   }
   input RegistrationNumber {
     rcNumber: String
@@ -74,7 +74,7 @@ export const vehicleTypeDefs = gql`
 export const vehicleResolvers = {
   Query: {
     vehicle: async (_, { input }) => {
-      console.log(input);
+      // console.log(input);
       const vehicleData = await vehicleAPI(input);
       // console.log(vehicleData);
       return {

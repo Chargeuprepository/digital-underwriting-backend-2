@@ -3,23 +3,20 @@ import redisClient from "../redisClient.js";
 
 export default async function dashboardRedis() {
   try {
-    const cacheGoogleSheetKey = "googleSheets_Data_AllDrivers_AllData";
-    const cacheKey = "dashboard_data";
-    const cachedData = await redisClient.get(cacheKey);
+    const cacheGoogleSheetKey = process.env.REDIS_ALL_DRIVERS;
+    const cacheDashboardKey = process.env.REDIS_DASHBOARD;
+    const cachedDashboardData = await redisClient.get(cacheDashboardKey);
 
-    if (cachedData) {
-      console.log("Serving from Redis cache");
-      return cachedData;
+    if (cachedDashboardData) {
+      console.log("Serving from Redis cache key: dashboard_data");
+      return cachedDashboardData;
     }
 
     // Fetch data from Google Sheets if not in cache
     const data = await dashboardController(cacheGoogleSheetKey);
 
-    // Cache the data in Redis for 5 minutes
-    await redisClient.setEx(cacheKey, 300, JSON.stringify(data));
+    // await redisClient.setEx(cacheKey, 300, JSON.stringify(data));
     return data;
-
-    console.log("Serving fresh data from Google Sheets");
   } catch (error) {
     console.error("Error in /api/data:", error);
   }

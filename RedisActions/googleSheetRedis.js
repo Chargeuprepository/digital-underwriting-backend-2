@@ -4,7 +4,7 @@ import redisClient from "../redisClient.js";
 // Endpoint to fetch data
 export default async function googleSheetRedis() {
   try {
-    const cacheKey = "googleSheets_Data_AllDrivers_AllData";
+    const cacheKey = process.env.REDIS_ALL_DRIVERS;
     const cachedData = await redisClient.get(cacheKey);
 
     if (cachedData) {

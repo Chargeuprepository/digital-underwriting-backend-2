@@ -1,8 +1,6 @@
 export default async function googleSheetController() {
   try {
-    const response = await fetch(
-      "https://script.google.com/macros/s/AKfycbwqu30W5SUWTUCUYFHbCmqkRG_zcrMD3iHqMF_LZEZIcYbU_UxQoGWKr1FpkvyPGuVrNA/exec"
-    );
+    const response = await fetch(process.env.GOOGLE_SHEET_API);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

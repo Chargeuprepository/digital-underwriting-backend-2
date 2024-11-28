@@ -30,6 +30,8 @@ export function calculateSixMonthDrivers(drivers) {
 
   // Helper function to parse date string to Date object
   const parseDate = (dateStr) => {
+    if (!dateStr) return null; // Return null if the date is invalid or undefined
+
     const formats = [
       { regex: /^(\d{2})-(\w{3})-(\d{2})$/, format: "dd-MMM-yy" },
       { regex: /^(\d{2})\/(\d{2})\/(\d{4})$/, format: "dd/MM/yyyy" },
@@ -60,6 +62,7 @@ export function calculateSixMonthDrivers(drivers) {
         return new Date(`${year}-${month}-${day}`); // Return as Date object
       }
     }
+
     return null; // If no format matched
   };
 
@@ -67,7 +70,9 @@ export function calculateSixMonthDrivers(drivers) {
   const recentDrivers = drivers.filter((driver) => {
     const onboardingDate = parseDate(driver.Onboarding_Date);
     return (
-      onboardingDate >= sixMonthsAgo && onboardingDate <= lastDayPreviousMonth
+      onboardingDate &&
+      onboardingDate >= sixMonthsAgo &&
+      onboardingDate <= lastDayPreviousMonth
     ); // Include the last day of the previous month
   });
 

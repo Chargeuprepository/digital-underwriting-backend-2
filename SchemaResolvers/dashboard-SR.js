@@ -3,6 +3,8 @@ import dashboardRedis from "../RedisActions/dashboardRedis.js";
 import { calculateRiskCreditKarmaDashboard } from "../Helper/calculateRiskCreditKarmaDashboard.js";
 import { calculateRunKm } from "../Helper/calculateRunKm.js";
 import { calculateSixMonthDrivers } from "../Helper/calculateSixMonthDrivers.js";
+import { calculateEMITrends } from "../Helper/calculateEMITrends.js";
+import { calculateChurnedDrivers } from "../Helper/calculateChurnedDrivers.js";
 
 export const dashboardTypeDefs = gql`
   type Query {
@@ -14,6 +16,8 @@ export const dashboardTypeDefs = gql`
     runKmData: [RunKmMonthData]
     riskCreditkarmaData: [CreditRiskKarma] # Using a union type for the field
     lastSixMonthDrivers: [MonthAndCount]
+    emiTrendsData: EmiTrendsData
+    churnedDriversData: [ChurnedDriversData]
   }
 
   type RunKmMonthData {
@@ -49,6 +53,18 @@ export const dashboardTypeDefs = gql`
     month: String
     count: Int
   }
+  type EmiTrendsData {
+    emiOnTime: String
+    emiTrends: [EmiValueName]
+  }
+  type EmiValueName {
+    value: Int
+    name: String
+  }
+  type ChurnedDriversData {
+    month: String
+    count: Int
+  }
 `;
 
 export const dashboardResolvers = {
@@ -78,7 +94,11 @@ export const dashboardResolvers = {
         runKmData: calculateRunKm(dashboardData),
         riskCreditkarmaData: calculateRiskCreditKarmaDashboard(dashboardData),
         lastSixMonthDrivers: calculateSixMonthDrivers(dashboardData),
+        emiTrendsData: calculateEMITrends(dashboardData),
+        churnedDriversData: calculateChurnedDrivers(dashboardData),
       };
+
+      // console.log(calculateChurnedDrivers(dashboardData));
 
       return dashboardManipulatedData;
     },

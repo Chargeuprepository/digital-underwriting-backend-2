@@ -1,4 +1,6 @@
 export function calculateRiskCreditKarmaDashboard(drivers) {
+  const activeDrivers = drivers.filter((driver) => driver.Status === "Active");
+
   const ranges = {
     credit: {
       high: (score) => score > 650,
@@ -38,7 +40,7 @@ export function calculateRiskCreditKarmaDashboard(drivers) {
     };
 
     // Categorize drivers
-    drivers.forEach((driver) => {
+    activeDrivers.forEach((driver) => {
       const primaryScore = driver[primaryKey];
       const secondaryScore = driver[secondaryKey];
 
@@ -74,10 +76,10 @@ export function calculateRiskCreditKarmaDashboard(drivers) {
     });
 
     // Convert counts to percentages
-    const totalDrivers = drivers.length;
+    const totalActiveDriversLength = activeDrivers.length;
     for (const key in categories) {
       categories[key] =
-        ((categories[key] / totalDrivers) * 100).toFixed(2) + "%";
+        ((categories[key] / totalActiveDriversLength) * 100).toFixed(2) + "%";
     }
 
     return categories;

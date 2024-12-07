@@ -103,10 +103,10 @@ export function calculateRiskCreditKarmaDashboard(drivers) {
     "Karma"
   );
 
-  return [
-    { __typename: "CreditRisk", ...creditVsRisk },
-    { __typename: "CreditKarma", ...creditVsKarma },
-  ];
+  return {
+    creditVsRisk,
+    creditVsKarma,
+  };
 }
 
 // const results = calculatePercentiles(drivers);

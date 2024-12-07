@@ -2,6 +2,7 @@ import axios from "axios";
 import https from "https";
 
 export default async function creditAPI(creditParams) {
+  console.log(creditParams);
   const url = "https://api.bureau.id/v2/services/credit-report-generation";
   const options = {
     method: "POST",

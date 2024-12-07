@@ -1,10 +1,10 @@
 import { gql } from "apollo-server-express";
-import dashboardRedis from "../RedisActions/dashboardRedis.js";
 import { calculateRiskCreditKarmaDashboard } from "../Helper/calculateRiskCreditKarmaDashboard.js";
 import { calculateRunKm } from "../Helper/calculateRunKm.js";
 import { calculateSixMonthDrivers } from "../Helper/calculateSixMonthDrivers.js";
 import { calculateEMITrends } from "../Helper/calculateEMITrends.js";
 import { calculateChurnedDrivers } from "../Helper/calculateChurnedDrivers.js";
+import sheetCallRedis from "../RedisActions/sheetCallRedis.js";
 
 export const dashboardTypeDefs = gql`
   type Query {
@@ -12,21 +12,25 @@ export const dashboardTypeDefs = gql`
   }
 
   type DashboardData {
-    totalDrivers: Int
+    totalDrivers: Float
     runKmData: [RunKmMonthData]
-    riskCreditkarmaData: [CreditRiskKarma] # Using a union type for the field
+    riskCreditkarmaData: RiskCreditkarmaData
     lastSixMonthDrivers: [MonthAndCount]
     emiTrendsData: EmiTrendsData
     churnedDriversData: [ChurnedDriversData]
   }
 
   type RunKmMonthData {
-    month: String
-    percentages: [String]
+    name: String
+    data: [String]
   }
 
-  union CreditRiskKarma = CreditRisk | CreditKarma # Define the union type
-  type CreditRisk {
+  type RiskCreditkarmaData {
+    creditVsRisk: CreditVsRisk
+    creditVsKarma: CreditVsKarma
+  }
+
+  type CreditVsRisk {
     CreditHighRiskHigh: String
     CreditHighRiskMedium: String
     CreditHighRiskLow: String
@@ -38,7 +42,7 @@ export const dashboardTypeDefs = gql`
     CreditLowRiskLow: String
   }
 
-  type CreditKarma {
+  type CreditVsKarma {
     CreditHighKarmaHigh: String
     CreditHighKarmaMedium: String
     CreditHighKarmaLow: String
@@ -51,54 +55,41 @@ export const dashboardTypeDefs = gql`
   }
   type MonthAndCount {
     month: String
-    count: Int
+    count: Float
   }
   type EmiTrendsData {
     emiOnTime: String
     emiTrends: [EmiValueName]
   }
   type EmiValueName {
-    value: Int
+    value: Float
     name: String
   }
   type ChurnedDriversData {
     month: String
-    count: Int
+    count: Float
   }
 `;
 
 export const dashboardResolvers = {
   Query: {
     dashboard: async (_) => {
-      const dashboardData = await dashboardRedis();
+      const dashboardData = await sheetCallRedis(process.env.REDIS_DASHBOARD);
 
       // console.log(dashboardData);
-
-      const data = {
-        // CreatedID: "FB1759",
-        // Onboarding_Date: "12-Aug-24",
-        // riskScore: "418",
-        // creditScore: "",
-        // karma: "517.2872",
-        // runKm: "55",
-        avgDPD: "203",
-        lossDays: "",
-        churnedDate: "",
-        // lastRunKm: "55",
-        // secondLastRunKm: "60",
-        // thirdLastRunKm: "39",
-      };
+      const driversWithCredit = dashboardData.filter(
+        (driver) => driver.creditScore > 0
+      );
 
       const dashboardManipulatedData = {
         totalDrivers: dashboardData.length,
         runKmData: calculateRunKm(dashboardData),
-        riskCreditkarmaData: calculateRiskCreditKarmaDashboard(dashboardData),
+        riskCreditkarmaData:
+          calculateRiskCreditKarmaDashboard(driversWithCredit),
         lastSixMonthDrivers: calculateSixMonthDrivers(dashboardData),
         emiTrendsData: calculateEMITrends(dashboardData),
         churnedDriversData: calculateChurnedDrivers(dashboardData),
       };
-
-      // console.log(calculateChurnedDrivers(dashboardData));
 
       return dashboardManipulatedData;
     },

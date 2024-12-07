@@ -5,16 +5,16 @@ export function calculateRunKm(drivers) {
   const getLastThreeMonths = () => {
     const today = new Date();
     const months = [];
-    for (let i = 1; i <= 3; i++) {
-      // Start from the previous month
+    for (let i = 3; i >= 1; i--) {
+      // Start from three months ago
       const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
       months.push(date.toLocaleString("default", { month: "long" }));
     }
     return months;
   };
 
-  const monthNames = getLastThreeMonths();
-  const monthKeys = ["lastRunKm", "secondLastRunKm", "thirdLastRunKm"];
+  const monthNames = getLastThreeMonths(); // Now sorted oldest to newest
+  const monthKeys = ["thirdLastRunKm", "secondLastRunKm", "lastRunKm"];
 
   // Initialize counts for ranges for each month
   const counts = monthKeys.map(() => [0, 0, 0, 0, 0]);
@@ -42,12 +42,12 @@ export function calculateRunKm(drivers) {
 
   // Format the data for output
   const runKmData = monthKeys.map((_, index) => {
-    const percentages = counts[index].map(
+    const data = counts[index].map(
       (count) => `${((count / totalDrivers) * 100).toFixed(0)}%`
     );
     return {
-      month: monthNames[index],
-      percentages,
+      name: monthNames[index],
+      data,
     };
   });
 

@@ -4,106 +4,103 @@ import dateFormat from "../Helper/dateFormat.js";
 
 export const creditTypeDefs = gql`
   type Query {
-    credit(input: ApplicantInput!): CreditData
+    credit(input: ApplicantInput!): Boolean
   }
   input ApplicantInput {
-    firstName: String!
-    lastName: String!
-    genderCode: String!
-    pan: String!
+    name: String!
     mobile: String!
-    dateOfBirth: String!
-    addressLine1: String!
-    addressLine2: String
-    city: String!
-    state: String!
-    pinCode: String!
-  }
-  type CreditData {
-    requestId: String
-    statusCode: Int
-    timestamp: Float
-    INProfileResponse: INProfileResponse
-  }
-
-  type INProfileResponse {
-    header: Header
-    hero: Hero
-    accountSummary: AccountSummary
-    personalDetails: PersonalDetails
-    applicationDetails: ApplicationDetails
-    capsSummary: CapsSummary
-    otherDetails: OtherDetails
-  }
-  type Header {
-    name: String
-    mobile: String
-  }
-  type Hero {
-    creditScore: Int
-    outstandingBalance: Int
-    accountsActive: Int
-    accountsDefault: Int
-  }
-  type PersonalDetails {
-    dateOfBirth: String
-    firstName: String
-    genderCode: Int
-    PANNumber: String
-    lastName: String
-    mobile: String
-  }
-  type ApplicationDetails {
-    amountFinanced: Int
-    buildingSociety: String
-    city: String
-    countryCode: String
-    flatPlotHouseNumber: String
-    landmark: String
-    pinCode: String
-    roadAreaLocality: String
-    state: Int
-  }
-  type CapsSummary {
-    capsLast180Days: Int
-    capsLast90Days: Int
-    capsLast30Days: Int
-    capsLast7Days: Int
-    nonCreditCapsLast180Days: Int
-    nonCreditCapsLast90Days: Int
-    nonCreditCapsLast30Days: Int
-    nonCreditCapsLast7Days: Int
-    totalCapsLast180Days: Int
-    totalCapsLast90Days: Int
-    totalCapsLast30Days: Int
-    totalCapsLast7Days: Int
-  }
-  type OtherDetails {
-    employmentStatus: String
-    income: Int
-    maritalStatus: String
-    numberOfMajorCreditCardHeld: Int
-    policy: String
-    timeWithEmployer: String
-  }
-  type AccountSummary {
-    creditScore: Int
-    cadSuitFiledCurrentBalance: Int
-    creditAccountActive: Int
-    creditAccountClosed: Int
-    creditAccountDefault: Int
-    creditAccountTotal: Int
-    outstandingBalanceAll: Int
-    outstandingBalanceSecured: Int
-    outstandingBalanceUnsecured: Int
+    idType: String!
+    idNumber: String!
+    consent: Boolean!
+    consentText: String!
   }
 `;
+// type CreditData {
+//   requestId: String
+//   statusCode: Int
+//   timestamp: Float
+//   INProfileResponse: INProfileResponse
+// }
+
+// type INProfileResponse {
+//   header: Header
+//   hero: Hero
+//   accountSummary: AccountSummary
+//   personalDetails: PersonalDetails
+//   applicationDetails: ApplicationDetails
+//   capsSummary: CapsSummary
+//   otherDetails: OtherDetails
+// }
+// type Header {
+//   name: String
+//   mobile: String
+// }
+// type Hero {
+//   creditScore: Int
+//   outstandingBalance: Int
+//   accountsActive: Int
+//   accountsDefault: Int
+// }
+// type PersonalDetails {
+//   dateOfBirth: String
+//   firstName: String
+//   genderCode: Int
+//   PANNumber: String
+//   lastName: String
+//   mobile: String
+// }
+// type ApplicationDetails {
+//   amountFinanced: Int
+//   buildingSociety: String
+//   city: String
+//   countryCode: String
+//   flatPlotHouseNumber: String
+//   landmark: String
+//   pinCode: String
+//   roadAreaLocality: String
+//   state: Int
+// }
+// type CapsSummary {
+//   capsLast180Days: Int
+//   capsLast90Days: Int
+//   capsLast30Days: Int
+//   capsLast7Days: Int
+//   nonCreditCapsLast180Days: Int
+//   nonCreditCapsLast90Days: Int
+//   nonCreditCapsLast30Days: Int
+//   nonCreditCapsLast7Days: Int
+//   totalCapsLast180Days: Int
+//   totalCapsLast90Days: Int
+//   totalCapsLast30Days: Int
+//   totalCapsLast7Days: Int
+// }
+// type OtherDetails {
+//   employmentStatus: String
+//   income: Int
+//   maritalStatus: String
+//   numberOfMajorCreditCardHeld: Int
+//   policy: String
+//   timeWithEmployer: String
+// }
+// type AccountSummary {
+//   creditScore: Int
+//   cadSuitFiledCurrentBalance: Int
+//   creditAccountActive: Int
+//   creditAccountClosed: Int
+//   creditAccountDefault: Int
+//   creditAccountTotal: Int
+//   outstandingBalanceAll: Int
+//   outstandingBalanceSecured: Int
+//   outstandingBalanceUnsecured: Int
+// }
 
 export const creditResolvers = {
   Query: {
     credit: async (_, { input }) => {
       // console.log(input);
       const creditData = await creditAPI(input);
+      console.log(creditData);
+      return true;
       // console.log(creditData);
       // const applicantDetails =
       //   creditData.processReturn.INProfileResponse.Current_Application

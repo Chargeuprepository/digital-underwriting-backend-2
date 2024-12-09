@@ -8,12 +8,16 @@ export function calculateBusinessInsights(drivers) {
     return data;
   };
 
+  const vehicleFinanced = { yes: 0, no: 0 };
+  const identityConfidence = { high: 0, medium: 0, low: 0 };
+  const phoneNameMatchScore = { high: 0, medium: 0, low: 0 };
+  const driversUsingUpi = { yes: 0, no: 0 };
+  const digitalFootprint = { high: 0, medium: 0, low: 0 };
+  const socialFootprint = { high: 0, medium: 0, low: 0 };
+  const phoneFootprint = { high: 0, medium: 0, low: 0 };
+  const digitalAge = { high: 0, medium: 0, low: 0 };
+  const phoneNetwork = { prepaid: 0, postpaid: 0 };
   const metrics = {
-    vehicleFinanced: { yes: 0, no: 0 },
-    identityConfidence: { high: 0, medium: 0, low: 0 },
-    driversUsingUpi: { yes: 0, no: 0 },
-    digitalFootprint: { high: 0, medium: 0, low: 0 },
-    socialFootprint: { high: 0, medium: 0, low: 0 },
     socialMediaPlatform: {
       amazon: 0,
       whatsapp: 0,
@@ -22,10 +26,6 @@ export function calculateBusinessInsights(drivers) {
       flipkart: 0,
       paytm: 0,
     },
-    phoneFootprint: { high: 0, medium: 0, low: 0 },
-    digitalAge: { high: 0, medium: 0, low: 0 },
-    phoneNameMatchScore: { high: 0, medium: 0, low: 0 },
-    phoneNetwork: { prepaid: 0, postpaid: 0 },
   };
 
   let totalCredit = 0;
@@ -34,26 +34,24 @@ export function calculateBusinessInsights(drivers) {
 
   for (const driver of drivers) {
     // VEHICLE_FINANCED
-    metrics.vehicleFinanced[driver.vehicleFinance ? "yes" : "no"]++;
+    vehicleFinanced[driver.vehicleFinance ? "yes" : "no"]++;
 
     // IDENTITY_CONFIDENCE
-    metrics.identityConfidence[driver.identityConfidence.toLowerCase()]++;
+    identityConfidence[driver.identityConfidence.toLowerCase()]++;
 
     // PHONE_NAME_MATCH_SCORE
     const score = driver.phoneNameMatchScore;
-    metrics.phoneNameMatchScore[
-      score > 70 ? "high" : score >= 40 ? "medium" : "low"
-    ]++;
+    phoneNameMatchScore[score > 70 ? "high" : score >= 40 ? "medium" : "low"]++;
 
     // DRIVERS_USING_UPI
-    metrics.driversUsingUpi[driver.vpa ? "yes" : "no"]++;
+    driversUsingUpi[driver.vpa ? "yes" : "no"]++;
 
     // DIGITAL_FOOTPRINT
-    metrics.digitalFootprint[driver.digitalFootprint.toLowerCase()]++;
+    digitalFootprint[driver.digitalFootprint.toLowerCase()]++;
 
     // SOCIAL_FOOTPRINT
     const sfScore = driver.socialFootprintScore;
-    metrics.socialFootprint[
+    socialFootprint[
       sfScore > 550 ? "high" : sfScore >= 300 ? "medium" : "low"
     ]++;
 
@@ -71,21 +69,21 @@ export function calculateBusinessInsights(drivers) {
     });
 
     // PHONE_FOOTPRINT
-    metrics.phoneFootprint[driver.phoneFootprint.toLowerCase()]++;
+    phoneFootprint[driver.phoneFootprint.toLowerCase()]++;
 
     // DIGITAL_AGE
     const dAge = driver.digitalage;
-    metrics.digitalAge[dAge > 550 ? "high" : dAge >= 400 ? "medium" : "low"]++;
+    digitalAge[dAge > 550 ? "high" : dAge >= 400 ? "medium" : "low"]++;
 
     // PHONE_NETWORK
-    metrics.phoneNetwork[driver.phoneNetwork]++;
+    phoneNetwork[driver.phoneNetwork]++;
 
     // CREDIT_SCORE_RANGE
-    const creditScore = +driver.creditScore;
-    if (creditScore > 0 && creditScore < 400) {
+    const creditScore = driver.creditScore;
+    if (creditScore > 0 && creditScore < 450) {
       range.lowCount++;
       totalCredit += creditScore;
-    } else if (creditScore >= 400 && creditScore <= 650) {
+    } else if (creditScore >= 450 && creditScore <= 650) {
       range.mediumCount++;
       totalCredit += creditScore;
     } else if (creditScore > 650) {
@@ -102,14 +100,12 @@ export function calculateBusinessInsights(drivers) {
   // PERCENTILE_CREDIT_AREA
   const creditDrivers = range.lowCount + range.mediumCount + range.highCount;
   const resultRange = {
-    lowCreditPercentage: ((range.lowCount / creditDrivers) * 100).toFixed(),
-    mediumCreditPercentage: (
-      (range.mediumCount / creditDrivers) *
-      100
-    ).toFixed(),
-    highCreditPercentage: ((range.highCount / creditDrivers) * 100).toFixed(),
+    lowCreditPercentage: range.lowCount === 0 ? 0 : range.lowCount,
+    mediumCreditPercentage: range.mediumCount === 0 ? 0 : range.mediumCount,
+    highCreditPercentage: range.highCount === 0 ? 0 : range.highCount,
   };
-  const avgCredit = (totalCredit / creditDrivers).toFixed();
+  const avgCredit =
+    totalCredit === 0 ? 0 : (totalCredit / creditDrivers).toFixed();
 
   // Convert all metrics to percentages
   for (const key in metrics) {
@@ -117,8 +113,18 @@ export function calculateBusinessInsights(drivers) {
   }
 
   return {
+    length: drivers.length,
     avgCredit,
     resultRange,
+    vehicleFinanced,
+    identityConfidence,
+    phoneNameMatchScore,
+    driversUsingUpi,
+    digitalFootprint,
+    socialFootprint,
+    phoneFootprint,
+    digitalAge,
+    phoneNetwork,
     uniqueCities: Array.from(uniqueCities), // Convert Set to Array
     ...metrics,
   };

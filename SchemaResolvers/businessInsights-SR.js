@@ -13,6 +13,7 @@ export const businessInsightsTypeDefs = gql`
     zone: [String]
   }
   type BusinessInsightsData {
+    length: String
     avgCredit: String
     resultRange: ResultRange
     vehicleFinanced: VehicleFinanced
@@ -100,7 +101,6 @@ export const businessInsightsResolvers = {
         risk,
         zone,
       });
-      console.log(filteredData[0]);
 
       // 3. Calculating the Insights Data from filteres drivers
       let data = calculateBusinessInsights(filteredData);

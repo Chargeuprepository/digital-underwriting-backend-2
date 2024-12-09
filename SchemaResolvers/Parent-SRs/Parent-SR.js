@@ -6,6 +6,10 @@ import { dashboardTypeDefs, dashboardResolvers } from "../dashboard-SR.js";
 import { onboardedTypeDefs, onboardedResolvers } from "../onboarded-SR.js";
 import { driverTypeDefs, driverResolvers } from "../driver-SR.js";
 import {
+  onboardedRiskTypeDefs,
+  onboardedRiskResolvers,
+} from "../onboardedRisk-SR.js";
+import {
   businessInsightsTypeDefs,
   businessInsightsResolvers,
 } from "../businessInsights-SR.js";
@@ -18,6 +22,7 @@ const typeDefs = gql`
   ${onboardedTypeDefs}
   ${driverTypeDefs}
   ${businessInsightsTypeDefs}
+  ${onboardedRiskTypeDefs}
 `;
 
 const resolvers = {
@@ -29,6 +34,7 @@ const resolvers = {
     onboarded: onboardedResolvers.Query.onboarded,
     driver: driverResolvers.Query.driver,
     businessInsights: businessInsightsResolvers.Query.businessInsights,
+    onboardedRisk: onboardedRiskResolvers.Query.onboardedRisk,
   },
 };
 

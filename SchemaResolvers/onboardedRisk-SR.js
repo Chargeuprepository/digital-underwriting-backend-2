@@ -1,5 +1,7 @@
 import { gql } from "apollo-server-express";
 import sheetCallRedis from "../RedisActions/sheetCallRedis.js";
+import { calculateSocialFootPrint } from "../Helper/calculateSocialFootPrint.js";
+import { calculateWhereIStand } from "../Helper/calculateWhereIStand.js";
 
 export const onboardedRiskTypeDefs = gql`
   type Query {
@@ -14,6 +16,7 @@ export const onboardedRiskTypeDefs = gql`
     identity: Identity
     social: Social
     telecom: Telecom
+    whereIStand: [WhereIStand]
   }
   type Digital {
     digitalFootprint: String
@@ -39,6 +42,11 @@ export const onboardedRiskTypeDefs = gql`
     billing: String
     portHistory: String
   }
+  type WhereIStand {
+    score: String
+    percent: String
+    color: String
+  }
 `;
 
 export const onboardedRiskResolvers = {
@@ -51,7 +59,7 @@ export const onboardedRiskResolvers = {
         (driver) => driver.CreatedID === input.id
       );
 
-      console.log(driverData);
+      // console.log(driverData);
 
       let data = {
         riskScore: driverData.riskScore,
@@ -68,7 +76,9 @@ export const onboardedRiskResolvers = {
           nameMatchScore: driverData.phoneNameMatchScore,
         },
         social: {
-          socialFootprint: socialFootprint(+driverData.socialFootprintScore),
+          socialFootprint: calculateSocialFootPrint(
+            +driverData.socialFootprintScore
+          ),
           socialMediaScore: driverData.socialScore,
           socialMediaCount: socialMediaCount(driverData),
           ecommerceScore: driverData.ecommerceScore,
@@ -79,9 +89,8 @@ export const onboardedRiskResolvers = {
           billing: driverData.phoneNetwork,
           portHistory: driverData.portingHistory,
         },
+        whereIStand: calculateWhereIStand(drivers),
       };
-
-      //   console.log(data);
 
       return data;
     },
@@ -105,10 +114,4 @@ function socialMediaCount(data) {
   }, 0);
 
   return accountFoundCount;
-}
-
-function socialFootprint(score) {
-  if (score <= 400) return "low";
-  else if (score > 400 && score <= 650) return "medium";
-  else if (score > 650) return "high";
 }

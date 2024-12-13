@@ -4,6 +4,14 @@ import vehicleAPI from "../APIs/vehicleAPI.js";
 export const vehicleTypeDefs = gql`
   type Vehicle {
     statusCode: Int
+    error: Error
+    data: Data
+  }
+  type Error {
+    statusCode: String
+    message: String
+  }
+  type Data {
     headerData: HeaderData
     owner: Owner
     vehicleInformation: VehicleInformation
@@ -74,10 +82,9 @@ export const vehicleTypeDefs = gql`
 export const vehicleResolvers = {
   Query: {
     vehicle: async (_, { input }) => {
-      // console.log(input);
       const vehicleData = await vehicleAPI(input);
-      // console.log(vehicleData);
-      return {
+
+      const data = {
         statusCode: vehicleData.statusCode,
         headerData: {
           maker: vehicleData.makerDescription,
@@ -124,6 +131,37 @@ export const vehicleResolvers = {
           normsDescription: vehicleData.normsDescription,
         },
       };
+
+      if (vehicleData?.statusCode === 200) {
+        return { data, error: null, statusCode: vehicleData.statusCode };
+      } else if (vehicleData?.errors?.status === 401) {
+        return {
+          data: null,
+          error: {
+            statusCode: vehicleData.errors.status,
+            message: vehicleData.errors.errorCode,
+          },
+          statusCode: vehicleData.errors.status,
+        };
+      } else if (vehicleData?.statusCode === 504) {
+        return {
+          data: null,
+          error: {
+            statusCode: vehicleData.statusCode,
+            message: "try after sometime",
+          },
+          statusCode: vehicleData.statusCode,
+        };
+      } else {
+        return {
+          data: null,
+          statusCode: 500,
+          error: {
+            statusCode: 500,
+            message: "Something went wrong",
+          },
+        };
+      }
     },
   },
 };

@@ -1,5 +1,7 @@
 import { gql } from "apollo-server-express";
 import riskAPI from "../APIs/riskAPI.js";
+import { calculateWhereIStand } from "../Helper/calculateWhereIStand.js";
+import sheetCallRedis from "../RedisActions/sheetCallRedis.js";
 
 export const riskTypeDefs = gql`
   type Query {
@@ -15,6 +17,14 @@ export const riskTypeDefs = gql`
   }
   type Transaction {
     statusCode: Int
+    error: Error
+    data: Data
+  }
+  type Error {
+    statusCode: String
+    message: String
+  }
+  type Data {
     error: String
     status: String
     timestamp: Float
@@ -23,12 +33,18 @@ export const riskTypeDefs = gql`
     workflowId: String
     workflowName: String
     riskScore: Float
+    whereIStand: [WhereIStand]
     header: Header
     insights: Insights
     allFourRisk: AllFourRisk
     telecomAttributes: TelecomAttributes
     digitalAttributes: DigitalAttributes
     socialAttributes: SocialAttributes
+  }
+  type WhereIStand {
+    score: String
+    percent: String
+    color: String
   }
   type Header {
     name: String
@@ -109,104 +125,154 @@ export const riskTypeDefs = gql`
 export const riskResolvers = {
   Query: {
     risk: async (_, { input }) => {
-      // console.log(input);
       const riskData = await riskAPI(input);
-      // console.log(riskData);
+      const drivers = await sheetCallRedis(process.env.REDIS_DRIVER);
 
-      const headerData = riskData.transactionRawInput;
-      const riskModelResponse = riskData.services["Risk Model"].response;
-      const phoneNameAttribute =
-        riskData.services["Phone Name Attribute"].response;
-      const phoneName = riskData.services["Phone Name"].response;
-      const phoneNetwork = riskData.services["Phone Network"].response;
-      const socialMedia =
-        riskData.services["Phone Social Combined Report"].response;
+      console.log(riskData);
 
-      return {
-        statusCode: riskData.statusCode,
-        error: riskData.error,
-        status: riskData.status,
-        timestamp: riskData.timestamp,
-        transactionId: riskData.transactionId,
-        merchantId: riskData.merchantId,
-        workflowId: riskData.workflowId,
-        workflowName: riskData.workflowName,
-        riskScore: riskModelResponse.riskScores.alternateRiskScore,
-        header: {
-          name: headerData.name,
-          mobile: headerData.phoneNumber,
-        },
-        insights: {
-          positives: riskModelResponse.positiveInsights,
-          negatives: riskModelResponse.negativeInsights,
-        },
-        allFourRisk: {
-          identity: {
-            identityConfidence: riskModelResponse.identityConfidence,
+      if (riskData.statusCode && riskData.statusCode === 200) {
+        if (riskData.services["Risk Model"].status === "FAILED") {
+          return {
+            statusCode: 400,
+            error: {
+              statusCode: "400",
+              message: "Bad Request",
+            },
+            data: null,
+          };
+        } else {
+          const headerData = riskData.transactionRawInput;
+          const riskModelResponse = riskData.services["Risk Model"].response;
+          const phoneNameAttribute =
+            riskData.services["Phone Name Attribute"].response;
+          const phoneName = riskData.services["Phone Name"].response;
+          const phoneNetwork = riskData.services["Phone Network"].response;
+          const socialMedia =
+            riskData.services["Phone Social Combined Report"].response;
+
+          return {
+            statusCode: riskData.statusCode,
+            error: null,
+            data: {
+              error: riskData.error,
+              status: riskData.status,
+              timestamp: riskData.timestamp,
+              transactionId: riskData.transactionId,
+              merchantId: riskData.merchantId,
+              workflowId: riskData.workflowId,
+              workflowName: riskData.workflowName,
+              riskScore: riskModelResponse.riskScores.alternateRiskScore,
+              whereIStand: calculateWhereIStand(drivers),
+              header: {
+                name: headerData.name,
+                mobile: headerData.phoneNumber,
+              },
+              insights: {
+                positives: riskModelResponse.positiveInsights,
+                negatives: riskModelResponse.negativeInsights,
+              },
+              allFourRisk: {
+                identity: {
+                  identityConfidence: riskModelResponse.identityConfidence,
+                },
+                telecom: {
+                  telecomRisk: riskModelResponse.telecomRisk,
+                  isPhoneReachable: String(riskModelResponse.isPhoneReachable),
+                  currentNetworkName: phoneNetwork.currentNetworkName,
+                  phoneFootprintStrengthOverall:
+                    phoneNameAttribute.phoneFootprintStrengthOverall,
+                },
+                digital: {
+                  digitalFootprint: riskModelResponse.digitalFootprint,
+                  name: phoneName.name,
+                  nameMatchScore: phoneNameAttribute.nameMatchScore,
+                  phoneDigitalAge: riskModelResponse.phoneDigitalAge,
+                },
+                social: {
+                  socialFootprintScore: riskModelResponse.socialFootprintScore,
+                  phoneSocialMediaCount:
+                    riskModelResponse.phoneSocialMediaCount,
+                  socialMediaScore:
+                    riskModelResponse.digitalBehaviour.socialMediaScore,
+                  eCommerceScore:
+                    riskModelResponse.digitalBehaviour.eCommerceScore,
+                  workUtilityScore:
+                    riskModelResponse.digitalBehaviour.workUtilityScore,
+                },
+              },
+              telecomAttributes: {
+                currentNetworkName: phoneNetwork.currentNetworkName,
+                currentNetworkRegion: phoneNetwork.currentNetworkRegion,
+                isPhoneReachable: String(phoneNetwork.isPhoneReachable),
+                numberHasPortingHistory: String(
+                  phoneNetwork.numberHasPortingHistory
+                ),
+                numberBillingType: phoneNetwork.numberBillingType,
+                mobileFraud: String(riskModelResponse.mobileFraud),
+                phoneFootprintStrengthOverall:
+                  phoneNameAttribute.phoneFootprintStrengthOverall,
+              },
+              digitalAttributes: {
+                name: phoneName.name,
+                source: phoneName.source,
+                vpa: phoneName.vpa,
+                upiPhoneNameMatch: riskModelResponse.upiPhoneNameMatch,
+                upiPhoneNameMatchScore:
+                  riskModelResponse.upiPhoneNameMatchScore,
+                nameMatchScore: phoneNameAttribute.nameMatchScore,
+                phoneDigitalAge: riskModelResponse.phoneDigitalAge,
+              },
+              socialAttributes: {
+                a23games: socialMedia.a23games,
+                ajio: null,
+                amazon: socialMedia.amazon,
+                byjus: socialMedia.byjus,
+                flipkart: socialMedia.flipkart,
+                housing: socialMedia.housing,
+                indiamart: socialMedia.indiamart,
+                instagram: socialMedia.instagram,
+                isWABusiness: socialMedia.isWABusiness,
+                jeevansaathi: socialMedia.jeevansaathi,
+                jiomart: socialMedia.jiomart,
+                my11: socialMedia.my11,
+                paytm: socialMedia.paytm,
+                rummycircle: socialMedia.rummycircle,
+                shaadi: socialMedia.shaadi,
+                swiggy: socialMedia.swiggy,
+                whatsapp: socialMedia.whatsapp,
+                yatra: socialMedia.yatra,
+              },
+            },
+          };
+        }
+      } else if (riskData.status === 401) {
+        return {
+          statusCode: 401,
+          error: {
+            statusCode: "401",
+            message: "Unauthorised",
           },
-          telecom: {
-            telecomRisk: riskModelResponse.telecomRisk,
-            isPhoneReachable: String(riskModelResponse.isPhoneReachable),
-            currentNetworkName: phoneNetwork.currentNetworkName,
-            phoneFootprintStrengthOverall:
-              phoneNameAttribute.phoneFootprintStrengthOverall,
+          data: null,
+        };
+      } else if (riskData.status === 503) {
+        return {
+          statusCode: 503,
+          error: {
+            statusCode: "503",
+            message: "INTERNAL_SERVICE_UNAVAILABLE",
           },
-          digital: {
-            digitalFootprint: riskModelResponse.digitalFootprint,
-            name: phoneName.name,
-            nameMatchScore: phoneNameAttribute.nameMatchScore,
-            phoneDigitalAge: riskModelResponse.phoneDigitalAge,
+          data: null,
+        };
+      } else {
+        return {
+          statusCode: 500,
+          error: {
+            statusCode: "500",
+            message: "Something went wrong",
           },
-          social: {
-            socialFootprintScore: riskModelResponse.socialFootprintScore,
-            phoneSocialMediaCount: riskModelResponse.phoneSocialMediaCount,
-            socialMediaScore:
-              riskModelResponse.digitalBehaviour.socialMediaScore,
-            eCommerceScore: riskModelResponse.digitalBehaviour.eCommerceScore,
-            workUtilityScore:
-              riskModelResponse.digitalBehaviour.workUtilityScore,
-          },
-        },
-        telecomAttributes: {
-          currentNetworkName: phoneNetwork.currentNetworkName,
-          currentNetworkRegion: phoneNetwork.currentNetworkRegion,
-          isPhoneReachable: String(phoneNetwork.isPhoneReachable),
-          numberHasPortingHistory: String(phoneNetwork.numberHasPortingHistory),
-          numberBillingType: phoneNetwork.numberBillingType,
-          mobileFraud: String(riskModelResponse.mobileFraud),
-          phoneFootprintStrengthOverall:
-            phoneNameAttribute.phoneFootprintStrengthOverall,
-        },
-        digitalAttributes: {
-          name: phoneName.name,
-          source: phoneName.source,
-          vpa: phoneName.vpa,
-          upiPhoneNameMatch: riskModelResponse.upiPhoneNameMatch,
-          upiPhoneNameMatchScore: riskModelResponse.upiPhoneNameMatchScore,
-          nameMatchScore: phoneNameAttribute.nameMatchScore,
-          phoneDigitalAge: riskModelResponse.phoneDigitalAge,
-        },
-        socialAttributes: {
-          a23games: socialMedia.a23games,
-          ajio: null,
-          amazon: socialMedia.amazon,
-          byjus: socialMedia.byjus,
-          flipkart: socialMedia.flipkart,
-          housing: socialMedia.housing,
-          indiamart: socialMedia.indiamart,
-          instagram: socialMedia.instagram,
-          isWABusiness: socialMedia.isWABusiness,
-          jeevansaathi: socialMedia.jeevansaathi,
-          jiomart: socialMedia.jiomart,
-          my11: socialMedia.my11,
-          paytm: socialMedia.paytm,
-          rummycircle: socialMedia.rummycircle,
-          shaadi: socialMedia.shaadi,
-          swiggy: socialMedia.swiggy,
-          whatsapp: socialMedia.whatsapp,
-          yatra: socialMedia.yatra,
-        },
-      };
+          data: null,
+        };
+      }
     },
   },
 };

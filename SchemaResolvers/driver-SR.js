@@ -1,6 +1,7 @@
 import { gql } from "apollo-server-express";
 import sheetCallRedis from "../RedisActions/sheetCallRedis.js";
 import { calculateVehicleAge } from "../Helper/calculateVehicleAge.js";
+import { calculateSocialFootPrint } from "../Helper/calculateSocialFootPrint.js";
 
 export const driverTypeDefs = gql`
   type Query {
@@ -16,11 +17,11 @@ export const driverTypeDefs = gql`
     contactInformation: ContactInformation
     vehicleInformation: VehicleInformation
     financialInformation: FinancialInformation
-    riskAndCreditInformation: RiskAndCreditInformation
+    footprintsAndRisk: FootprintsAndRisk
     businessInformation: BusinessInformation
     socialMediaInformation: SocialMediaInformation
     runKmInformation: RunKmInformation
-    earningInformation: EarningInformation
+    earningVsExpense: EarningVsExpense
     emi: String
   }
 
@@ -74,12 +75,13 @@ export const driverTypeDefs = gql`
     emiDpd: String
   }
 
-  type RiskAndCreditInformation {
+  type FootprintsAndRisk {
     riskScore: String
-    socialFootPrintScore: String
+    socialFootPrint: String
+    digitalFootPrint: String
+    phoneFootPrint: String
     telecomRisk: String
     socialScore: String
-    digitalFootPrint: String
     identityConfidence: String
   }
 
@@ -102,10 +104,19 @@ export const driverTypeDefs = gql`
     secondLastRunKm: String
     lastRunKm: String
   }
+  type EarningVsExpense {
+    earningInformation: EarningInformation
+    expenseInformation: ExpenseInformation
+  }
   type EarningInformation {
     thirdLastEarning: String
     secondLastEarning: String
     lastEarning: String
+  }
+  type ExpenseInformation {
+    thirdLastExpense: String
+    secondLastExpense: String
+    lastExpense: String
   }
 `;
 
@@ -125,6 +136,9 @@ export const driverResolvers = {
 
         return dayDiff;
       }
+      function toFix(value, fix = 0) {
+        return value !== "" && value.toFixed(fix);
+      }
 
       const driverManipulatedData = {
         id: driverData.CreatedID,
@@ -132,11 +146,11 @@ export const driverResolvers = {
         onboardedDate: driverData.Onboarding_Date.split("T")[0],
         cardData: {
           service: driverData.service,
-          runKm: driverData.runKm.toFixed(),
+          runKm: toFix(driverData.runKm),
           lossDays: driverData.lossDays,
           karmaScore: driverData.karmaScore,
-          nps: driverData.NPS.toFixed(),
-          avgDpd: driverData.avgDPD.toFixed(),
+          nps: toFix(driverData.NPS),
+          avgDpd: toFix(driverData.avgDPD),
           aon: ageOnNetwork(driverData.Onboarding_Date),
         },
         personalInformation: {
@@ -172,15 +186,18 @@ export const driverResolvers = {
           downPayment: driverData.DownPayment,
           tenure: driverData.Tenure,
           creditScore: driverData.creditScore,
-          avgDpd: driverData.avgDPD.toFixed(2),
+          avgDpd: driverData.avgDPD,
           emiDpd: driverData.emidpd,
         },
-        riskAndCreditInformation: {
+        footprintsAndRisk: {
           riskScore: driverData.riskScore,
-          socialFootPrintScore: driverData.socialFootprintScore,
+          socialFootPrint: calculateSocialFootPrint(
+            driverData.socialFootprintScore
+          ),
+          digitalFootPrint: driverData.digitalFootprint?.toLowerCase(),
+          phoneFootPrint: driverData.phoneFootprint?.toLowerCase(),
           telecomRisk: driverData.telecomRisk,
           socialScore: driverData.socialScore,
-          digitalFootPrint: driverData.digitalFootprint,
           identityConfidence: driverData.identityConfidence,
         },
         businessInformation: {
@@ -196,15 +213,29 @@ export const driverResolvers = {
           whatsapp: driverData.whatsapp,
         },
         runKmInformation: {
-          thirdLastRunKm: driverData.thirdLastRunKm.toFixed(),
-          secondLastRunKm: driverData.secondLastRunKm.toFixed(),
-          lastRunKm: driverData.lastRunKm.toFixed(),
+          thirdLastRunKm: toFix(driverData.thirdLastRunKm),
+          secondLastRunKm: toFix(driverData.secondLastRunKm),
+          lastRunKm: toFix(driverData.lastRunKm),
         },
-        earningInformation: {
-          thirdLastEarning: (driverData.thirdLastRunKm * 15 * 25).toFixed(),
-          secondLastEarning: (driverData.secondLastRunKm * 15 * 25).toFixed(),
-          lastEarning: (driverData.lastRunKm * 15 * 25).toFixed(),
+        earningVsExpense: {
+          earningInformation: {
+            thirdLastEarning: (driverData.thirdLastRunKm * 15 * 25).toFixed(),
+            secondLastEarning: (driverData.secondLastRunKm * 15 * 25).toFixed(),
+            lastEarning: (driverData.lastRunKm * 15 * 25).toFixed(),
+          },
+          expenseInformation: {
+            thirdLastExpense: (
+              driverData.thirdLastRunKm * 0.5 * 25 +
+              5000
+            ).toFixed(),
+            secondLastExpense: (
+              driverData.secondLastRunKm * 0.5 * 25 +
+              5000
+            ).toFixed(),
+            lastExpense: (driverData.lastRunKm * 0.5 * 25 + 5000).toFixed(),
+          },
         },
+
         emi: driverData.emidpd,
       };
 

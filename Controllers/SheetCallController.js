@@ -11,7 +11,7 @@ export default async function sheetCallController(cacheGoogleSheetKey) {
 
   console.log("getting fresh data from the googleSheet");
   const data = await googleSheetController();
-  await redisClient.setEx(cacheGoogleSheetKey, 300 * 24, JSON.stringify(data));
+  await redisClient.setEx(cacheGoogleSheetKey, 3600 * 24, JSON.stringify(data));
 
   return data;
 }

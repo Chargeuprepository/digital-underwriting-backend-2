@@ -1,6 +1,6 @@
 import axios from "axios";
+import { error } from "console";
 import https from "https";
-import redisClient from "../redisClient.js";
 
 export default async function riskAPI(input) {
   const url = "https://api.bureau.id/transactions";
@@ -19,8 +19,7 @@ export default async function riskAPI(input) {
     workflowId: "d7b8d856-5bee-41be-b234-3faf9b4cb9d9",
     data: {
       countryCode: "IND",
-      // email: input.email,
-      phoneNumber: input.phoneNumber,
+      phoneNumber: "91" + input.phoneNumber,
       name: input.name,
       derivedSignals: true,
       enhancedCoverage: true,
@@ -33,9 +32,12 @@ export default async function riskAPI(input) {
       return response;
     })
     .catch((error) => {
-      console.error("Error:", error);
       return error;
     });
+
+  if (response1.status !== 200) {
+    return response1;
+  }
 
   apiInput = {
     transactionId: response1.data?.transactionId,
@@ -48,7 +50,7 @@ export default async function riskAPI(input) {
       return response;
     })
     .catch((error) => {
-      console.error("Error:", error);
+      return error;
     });
   return response2.data;
 }

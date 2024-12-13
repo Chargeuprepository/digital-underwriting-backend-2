@@ -84,7 +84,7 @@ export const onboardedResolvers = {
 
         await redisClient.setEx(
           `CREDIT_${credit}_RISK_${risk}_KARMA_${karma}`,
-          300 * 24,
+          3600 * 24,
           JSON.stringify(driverData)
         );
       }

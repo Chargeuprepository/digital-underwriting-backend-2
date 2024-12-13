@@ -23,9 +23,7 @@ export default async function vehicleAPI(registrationNumber) {
     );
 
     return response.data;
-    // res.json({ data: response.data });
   } catch (error) {
-    // console.error("Error fetching data:", error);
-    return error;
+    return error.response.data;
   }
 }

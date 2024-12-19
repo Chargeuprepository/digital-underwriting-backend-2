@@ -11,7 +11,15 @@ export const onboardedRiskTypeDefs = gql`
     id: String
   }
   type DriverDetails {
-    riskScore: String
+    error: Error
+    data: Data
+  }
+  type Error {
+    status: Int
+    message: String
+  }
+  type Data {
+    riskScore: Float
     digital: Digital
     identity: Identity
     social: Social
@@ -52,47 +60,50 @@ export const onboardedRiskTypeDefs = gql`
 export const onboardedRiskResolvers = {
   Query: {
     onboardedRisk: async (_, { input }) => {
-      console.log(input);
-      const drivers = await sheetCallRedis(process.env.REDIS_DRIVER);
+      const drivers = await sheetCallRedis();
 
-      const driverData = drivers.find(
-        (driver) => driver.CreatedID === input.id
-      );
+      if (drivers.error === null && drivers.data) {
+        const driverData = drivers.data.find(
+          (driver) => driver.CreatedID === input.id
+        );
 
-      // console.log(driverData);
+        let data = {
+          riskScore: driverData.riskScore,
+          digital: {
+            digitalFootprint: driverData.digitalFootprint,
+            affluenceScore: driverData.affluenceScore,
+            digitalPaymentScore: driverData.digitalPaymentScore,
+            vpa: driverData.vpa,
+          },
+          identity: {
+            identityConfidence: driverData.identityConfidence,
+            phoneFootprint: driverData.phoneFootprint,
+            digitalAge: driverData.digitalage,
+            nameMatchScore: driverData.phoneNameMatchScore,
+          },
+          social: {
+            socialFootprint: calculateSocialFootPrint(
+              +driverData.socialFootprintScore
+            ),
+            socialMediaScore: driverData.socialScore,
+            socialMediaCount: socialMediaCount(driverData),
+            ecommerceScore: driverData.ecommerceScore,
+          },
+          telecom: {
+            telecomRisk: driverData.telecomRisk,
+            isPhoneReachable: driverData.phoneReachable,
+            billing: driverData.phoneNetwork,
+            portHistory: driverData.portingHistory,
+          },
+          whereIStand: calculateWhereIStand(drivers.data),
+        };
 
-      let data = {
-        riskScore: driverData.riskScore,
-        digital: {
-          digitalFootprint: driverData.digitalFootprint,
-          affluenceScore: driverData.affluenceScore,
-          digitalPaymentScore: driverData.digitalPaymentScore,
-          vpa: driverData.vpa,
-        },
-        identity: {
-          identityConfidence: driverData.identityConfidence,
-          phoneFootprint: driverData.phoneFootprint,
-          digitalAge: driverData.digitalage,
-          nameMatchScore: driverData.phoneNameMatchScore,
-        },
-        social: {
-          socialFootprint: calculateSocialFootPrint(
-            +driverData.socialFootprintScore
-          ),
-          socialMediaScore: driverData.socialScore,
-          socialMediaCount: socialMediaCount(driverData),
-          ecommerceScore: driverData.ecommerceScore,
-        },
-        telecom: {
-          telecomRisk: driverData.telecomRisk,
-          isPhoneReachable: driverData.phoneReachable,
-          billing: driverData.phoneNetwork,
-          portHistory: driverData.portingHistory,
-        },
-        whereIStand: calculateWhereIStand(drivers),
-      };
-
-      return data;
+        return { error: null, data };
+      } else if (drivers.data === null && drivers.error) {
+        return drivers;
+      } else if (drivers.data === null) {
+        return { error: { status: 401, message: "Bad Request" }, data: null };
+      }
     },
   },
 };

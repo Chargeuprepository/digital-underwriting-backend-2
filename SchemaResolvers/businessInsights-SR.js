@@ -13,6 +13,14 @@ export const businessInsightsTypeDefs = gql`
     zone: [String]
   }
   type BusinessInsightsData {
+    error: Error
+    data: Data
+  }
+  type Error {
+    status: Int
+    message: String
+  }
+  type Data {
     length: String
     avgCredit: String
     resultRange: ResultRange
@@ -88,24 +96,33 @@ export const businessInsightsTypeDefs = gql`
 export const businessInsightsResolvers = {
   Query: {
     businessInsights: async (_, { input }) => {
-      console.log(input);
       const { credit, risk, zone } = input;
       // 1. Getting all Drivers
-      const businessInsightsData = await sheetCallRedis(
-        process.env.REDIS_BUSINESS_INSIGHTS
-      );
+      const businessInsightsData = await sheetCallRedis();
 
-      // 2. Filtering drivers on Risk, Credit and Zone
-      const filteredData = creditRiskKarmaZoneFilter(businessInsightsData, {
-        credit,
-        risk,
-        zone,
-      });
+      if (businessInsightsData.error === null && businessInsightsData.data) {
+        // 2. Filtering drivers on Risk, Credit and Zone
+        const filteredData = creditRiskKarmaZoneFilter(
+          businessInsightsData.data,
+          {
+            credit,
+            risk,
+            zone,
+          }
+        );
 
-      // 3. Calculating the Insights Data from filteres drivers
-      let data = calculateBusinessInsights(filteredData);
+        // 3. Calculating the Insights Data from filteres drivers
+        let data = calculateBusinessInsights(filteredData);
 
-      return data;
+        return { error: null, data };
+      } else if (businessInsightsData.data === null) {
+        return {
+          error: businessInsightsData.error,
+          data: null,
+        };
+      } else {
+        return { error: { status: 401, message: "Bad Request" }, data: null };
+      }
     },
   },
 };

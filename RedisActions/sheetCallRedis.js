@@ -1,24 +1,32 @@
-import sheetCallController from "../Controllers/SheetCallController.js";
 import redisClient from "../redisClient.js";
+import googleSheetController from "../Controllers/googleSheetController.js";
 
-export default async function sheetCallRedis(cacheKey) {
+export default async function sheetCallRedis() {
   try {
     const cacheGoogleSheetKey = process.env.REDIS_ALL_DRIVERS;
-    const cachedData = await redisClient.get(cacheKey);
+    const cacheGoogleSheetData = await redisClient.get(cacheGoogleSheetKey);
 
-    if (cachedData) {
-      console.log(`Serving from Redis cache key: ${cacheKey}`);
-      const response = await JSON.parse(cachedData);
-
-      return response;
+    if (cacheGoogleSheetData) {
+      console.log(`serving data from redis cache key: ${cacheGoogleSheetKey}`);
+      const data = JSON.parse(cacheGoogleSheetData);
+      return { error: null, data: data };
     }
 
-    // Fetch data from Google Sheets if not in cache
-    const data = await sheetCallController(cacheGoogleSheetKey);
+    console.log("getting fresh data from the googleSheet");
+    const data = await googleSheetController();
+    if (data.error === null && data.data) {
+      await redisClient.setEx(
+        cacheGoogleSheetKey,
+        3600 * 24,
+        JSON.stringify(data.data)
+      );
+    }
 
-    // await redisClient.setEx(cacheKey, 300, JSON.stringify(data));
     return data;
   } catch (error) {
-    console.error("Error in /api/data:", error);
+    return {
+      error: { status: 401, message: "Bad Request" },
+      data: null,
+    };
   }
 }

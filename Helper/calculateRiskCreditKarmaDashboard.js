@@ -108,6 +108,3 @@ export function calculateRiskCreditKarmaDashboard(drivers) {
     creditVsKarma,
   };
 }
-
-// const results = calculatePercentiles(drivers);
-// console.log(results);

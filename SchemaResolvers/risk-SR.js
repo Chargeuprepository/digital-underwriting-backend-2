@@ -126,9 +126,7 @@ export const riskResolvers = {
   Query: {
     risk: async (_, { input }) => {
       const riskData = await riskAPI(input);
-      const drivers = await sheetCallRedis(process.env.REDIS_DRIVER);
-
-      console.log(riskData);
+      const drivers = await sheetCallRedis();
 
       if (riskData.statusCode && riskData.statusCode === 200) {
         if (riskData.services["Risk Model"].status === "FAILED") {
@@ -162,7 +160,7 @@ export const riskResolvers = {
               workflowId: riskData.workflowId,
               workflowName: riskData.workflowName,
               riskScore: riskModelResponse.riskScores.alternateRiskScore,
-              whereIStand: calculateWhereIStand(drivers),
+              whereIStand: calculateWhereIStand(drivers.data),
               header: {
                 name: headerData.name,
                 mobile: headerData.phoneNumber,

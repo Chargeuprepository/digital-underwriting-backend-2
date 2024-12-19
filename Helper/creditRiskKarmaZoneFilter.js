@@ -1,7 +1,18 @@
 export function creditRiskKarmaZoneFilter(drivers, filters) {
-  const { credit, risk, karma, zone } = filters;
+  const { credit, risk, karma, zone, searchId } = filters;
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  if (searchId) {
+    return drivers.filter((driver) => driver.CreatedID === searchId);
+  }
 
   return drivers
+    .filter((driver) => {
+      const onboardingMonth = new Date(driver.Onboarding_Date).getMonth(); // Extract the month from Onboarding_Date
+      const onboardingYear = new Date(driver.Onboarding_Date).getFullYear(); // Extract the month from Onboarding_Date
+      return onboardingMonth !== currentMonth || onboardingYear !== currentYear; // Filter out drivers whose onboarding month is the current month
+    })
     .filter((driver) => driver.Status === "Active") // Always filter by status first
     .filter((driver) => {
       // Credit filter
@@ -15,7 +26,8 @@ export function creditRiskKarmaZoneFilter(drivers, filters) {
           driver.creditScore <= 450 &&
           driver.creditScore > 0) ||
         (credit === "NTC" &&
-          (driver.creditScore === "" ||
+          (driver.creditScore === -1 ||
+            // driver.creditScore === "" ||
             driver.creditScore === null ||
             driver.creditScore === undefined));
 

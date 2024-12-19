@@ -12,6 +12,16 @@ export const dashboardTypeDefs = gql`
   }
 
   type DashboardData {
+    error: Error
+    data: Data
+  }
+
+  type Error {
+    status: Int
+    message: String
+  }
+
+  type Data {
     totalDrivers: Float
     runKmData: [RunKmMonthData]
     riskCreditkarmaData: RiskCreditkarmaData
@@ -74,24 +84,29 @@ export const dashboardTypeDefs = gql`
 export const dashboardResolvers = {
   Query: {
     dashboard: async (_) => {
-      const dashboardData = await sheetCallRedis(process.env.REDIS_DASHBOARD);
+      const dashboardData = await sheetCallRedis();
 
-      // console.log(dashboardData);
-      const driversWithCredit = dashboardData.filter(
-        (driver) => driver.creditScore > 0
-      );
+      if (dashboardData.error === null) {
+        const driversWithCredit = dashboardData.data.filter(
+          (driver) => driver.creditScore > 0
+        );
 
-      const dashboardManipulatedData = {
-        totalDrivers: dashboardData.length,
-        runKmData: calculateRunKm(dashboardData),
-        riskCreditkarmaData:
-          calculateRiskCreditKarmaDashboard(driversWithCredit),
-        lastSixMonthDrivers: calculateSixMonthDrivers(dashboardData),
-        emiTrendsData: calculateEMITrends(dashboardData),
-        churnedDriversData: calculateChurnedDrivers(dashboardData),
-      };
+        const dashboardManipulatedData = {
+          totalDrivers: dashboardData.data.length,
+          runKmData: calculateRunKm(dashboardData.data),
+          riskCreditkarmaData:
+            calculateRiskCreditKarmaDashboard(driversWithCredit),
+          lastSixMonthDrivers: calculateSixMonthDrivers(dashboardData.data),
+          emiTrendsData: calculateEMITrends(dashboardData.data),
+          churnedDriversData: calculateChurnedDrivers(dashboardData.data),
+        };
 
-      return dashboardManipulatedData;
+        return { error: null, data: dashboardManipulatedData };
+      } else if (dashboardData.data === null) {
+        return { error: dashboardData.error, dashboardManipulatedData: null };
+      } else {
+        return { error: { status: 401, message: "Bad Request" }, data: null };
+      }
     },
   },
 };

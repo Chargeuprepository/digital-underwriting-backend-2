@@ -97,11 +97,8 @@ export const creditTypeDefs = gql`
 export const creditResolvers = {
   Query: {
     credit: async (_, { input }) => {
-      // console.log(input);
       const creditData = await creditAPI(input);
-      console.log(creditData);
       return true;
-      // console.log(creditData);
       // const applicantDetails =
       //   creditData.processReturn.INProfileResponse.Current_Application
       //     .Current_Application_Details.Current_Applicant_Details;

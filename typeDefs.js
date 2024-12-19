@@ -1,13 +1,13 @@
-import { gql } from "apollo-server-express";
+// import { gql } from "apollo-server-express";
 
-export const typeDefs = gql`
-  type Query {
-    getSheetData: [SheetData]
-  }
+// export const typeDefs = gql`
+//   type Query {
+//     getSheetData: [SheetData]
+//   }
 
-  type SheetData {
-    id: ID
-    name: String
-    value: Float
-  }
-`;
+//   type SheetData {
+//     id: ID
+//     name: String
+//     value: Float
+//   }
+// `;

@@ -13,7 +13,14 @@ export const dashboardTypeDefs = gql`
 
   type DashboardData {
     error: Error
+    settingGoogleSheetDataInfo: SettingGoogleSheetDataInfo
+    gettingGoogleSheetDataInfo: Error
     data: Data
+  }
+
+  type SettingGoogleSheetDataInfo {
+    dataSet: Boolean
+    error: Error
   }
 
   type Error {
@@ -86,7 +93,7 @@ export const dashboardResolvers = {
     dashboard: async (_) => {
       const dashboardData = await sheetCallRedis();
 
-      if (dashboardData.error === null) {
+      if (dashboardData.error === null && dashboardData.data) {
         const driversWithCredit = dashboardData.data.filter(
           (driver) => driver.creditScore > 0
         );
@@ -101,9 +108,14 @@ export const dashboardResolvers = {
           churnedDriversData: calculateChurnedDrivers(dashboardData.data),
         };
 
-        return { error: null, data: dashboardManipulatedData };
+        return {
+          error: null,
+          settingGoogleSheetDataInfo: dashboardData.settingGoogleSheetDataInfo,
+          gettingGoogleSheetDataInfo: dashboardData.gettingGoogleSheetDataInfo,
+          data: dashboardManipulatedData,
+        };
       } else if (dashboardData.data === null) {
-        return { error: dashboardData.error, dashboardManipulatedData: null };
+        return { error: dashboardData.error, data: null };
       } else {
         return { error: { status: 401, message: "Bad Request" }, data: null };
       }

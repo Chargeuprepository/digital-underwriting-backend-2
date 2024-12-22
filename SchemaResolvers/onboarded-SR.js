@@ -17,7 +17,13 @@ export const onboardedTypeDefs = gql`
   }
   type DriverData {
     error: Error
+    settingGoogleSheetDataInfo: SettingGoogleSheetDataInfo
+    gettingGoogleSheetDataInfo: Error
     data: Data
+  }
+  type SettingGoogleSheetDataInfo {
+    dataSet: Boolean
+    error: Error
   }
   type Error {
     status: Int
@@ -54,7 +60,10 @@ export const onboardedResolvers = {
       let onboardedManipulatedData = [];
       let driverData = {};
       let error = {};
-      if (!response) {
+      let settingGoogleSheetDataInfo;
+      let gettingGoogleSheetDataInfo;
+
+      if (!response?.onboardedManipulatedData) {
         // 1. Getting all drivers
         const onboardedData = await sheetCallRedis();
 
@@ -90,6 +99,9 @@ export const onboardedResolvers = {
             (a, b) => b.credit - a.credit
           );
 
+          settingGoogleSheetDataInfo = onboardedData.settingGoogleSheetDataInfo;
+          gettingGoogleSheetDataInfo = onboardedData.gettingGoogleSheetDataInfo;
+
           await redisClient.setEx(
             `CREDIT_${credit}_RISK_${risk}_KARMA_${karma}`,
             3600 * 24,
@@ -123,6 +135,8 @@ export const onboardedResolvers = {
           }
         : {
             error: null,
+            settingGoogleSheetDataInfo,
+            gettingGoogleSheetDataInfo,
             data: {
               length: onboardedManipulatedData.length,
               onboardedManipulatedData:

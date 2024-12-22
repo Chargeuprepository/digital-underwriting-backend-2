@@ -14,7 +14,13 @@ export const businessInsightsTypeDefs = gql`
   }
   type BusinessInsightsData {
     error: Error
+    settingGoogleSheetDataInfo: SettingGoogleSheetDataInfo
+    gettingGoogleSheetDataInfo: Error
     data: Data
+  }
+  type SettingGoogleSheetDataInfo {
+    dataSet: Boolean
+    error: Error
   }
   type Error {
     status: Int
@@ -114,7 +120,14 @@ export const businessInsightsResolvers = {
         // 3. Calculating the Insights Data from filteres drivers
         let data = calculateBusinessInsights(filteredData);
 
-        return { error: null, data };
+        return {
+          error: null,
+          settingGoogleSheetDataInfo:
+            businessInsightsData.settingGoogleSheetDataInfo,
+          gettingGoogleSheetDataInfo:
+            businessInsightsData.gettingGoogleSheetDataInfo,
+          data,
+        };
       } else if (businessInsightsData.data === null) {
         return {
           error: businessInsightsData.error,

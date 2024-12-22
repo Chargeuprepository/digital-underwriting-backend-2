@@ -12,7 +12,14 @@ export const onboardedRiskTypeDefs = gql`
   }
   type DriverDetails {
     error: Error
+    settingGoogleSheetDataInfo: SettingGoogleSheetDataInfo
+    gettingGoogleSheetDataInfo: Error
     data: Data
+  }
+
+  type SettingGoogleSheetDataInfo {
+    dataSet: Boolean
+    error: Error
   }
   type Error {
     status: Int
@@ -98,7 +105,12 @@ export const onboardedRiskResolvers = {
           whereIStand: calculateWhereIStand(drivers.data),
         };
 
-        return { error: null, data };
+        return {
+          error: null,
+          settingGoogleSheetDataInfo: drivers.settingGoogleSheetDataInfo,
+          gettingGoogleSheetDataInfo: drivers.gettingGoogleSheetDataInfo,
+          data,
+        };
       } else if (drivers.data === null && drivers.error) {
         return drivers;
       } else if (drivers.data === null) {

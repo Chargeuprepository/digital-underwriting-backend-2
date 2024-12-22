@@ -33,18 +33,12 @@ export const riskTypeDefs = gql`
     workflowId: String
     workflowName: String
     riskScore: Float
-    whereIStand: [WhereIStand]
     header: Header
     insights: Insights
     allFourRisk: AllFourRisk
     telecomAttributes: TelecomAttributes
     digitalAttributes: DigitalAttributes
     socialAttributes: SocialAttributes
-  }
-  type WhereIStand {
-    score: String
-    percent: String
-    color: String
   }
   type Header {
     name: String
@@ -128,6 +122,8 @@ export const riskResolvers = {
       const riskData = await riskAPI(input);
       const drivers = await sheetCallRedis();
 
+      // console.log(drivers.data.length, drivers.error, drivers.dataSet);
+
       if (riskData.statusCode && riskData.statusCode === 200) {
         if (riskData.services["Risk Model"].status === "FAILED") {
           return {
@@ -160,7 +156,6 @@ export const riskResolvers = {
               workflowId: riskData.workflowId,
               workflowName: riskData.workflowName,
               riskScore: riskModelResponse.riskScores.alternateRiskScore,
-              whereIStand: calculateWhereIStand(drivers.data),
               header: {
                 name: headerData.name,
                 mobile: headerData.phoneNumber,

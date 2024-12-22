@@ -11,7 +11,14 @@ export const driverTypeDefs = gql`
 
   type DriverData {
     error: Error
+    settingGoogleSheetDataInfo: SettingGoogleSheetDataInfo
+    gettingGoogleSheetDataInfo: Error
     data: Data
+  }
+
+  type SettingGoogleSheetDataInfo {
+    dataSet: Boolean
+    error: Error
   }
 
   type Error {
@@ -277,7 +284,12 @@ export const driverResolvers = {
           emi: driverData.emidpd,
         };
 
-        return { error: null, data: driverManipulatedData };
+        return {
+          error: null,
+          settingGoogleSheetDataInfo: drivers.settingGoogleSheetDataInfo,
+          gettingGoogleSheetDataInfo: drivers.gettingGoogleSheetDataInfo,
+          data: driverManipulatedData,
+        };
       } else if (drivers.data === null && drivers.error) {
         return {
           data: null,

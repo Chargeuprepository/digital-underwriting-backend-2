@@ -18,15 +18,13 @@ export function calculateSixMonthDrivers(drivers) {
   const currentMonth = today.getMonth(); // Current month (0-11)
   const currentYear = today.getFullYear();
 
-  // Get the last day of the previous month (the day before the 1st of this month)
-  const lastDayPreviousMonth = new Date(today);
-  lastDayPreviousMonth.setMonth(currentMonth); // Set to current month
-  lastDayPreviousMonth.setDate(0); // Set date to the last day of the previous month
-
-  // Get the first date of the month 6 months ago (inclusive)
-  const sixMonthsAgo = new Date(today);
-  sixMonthsAgo.setMonth(currentMonth - 6); // Set to 6 months ago
-  sixMonthsAgo.setDate(1); // First day of the month 6 months ago
+  // Initialize the last 6 months excluding the current month
+  const monthRange = [];
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(currentYear, currentMonth - i - 1, 1); // Adjust to get the correct month and year
+    const monthYear = `${months[date.getMonth()]}-${date.getFullYear()}`;
+    monthRange.push(monthYear);
+  }
 
   // Helper function to parse date string to Date object
   const parseDate = (dateStr) => {
@@ -71,9 +69,10 @@ export function calculateSixMonthDrivers(drivers) {
     const onboardingDate = parseDate(driver.Onboarding_Date);
     return (
       onboardingDate &&
-      onboardingDate >= sixMonthsAgo &&
-      onboardingDate <= lastDayPreviousMonth
-    ); // Include the last day of the previous month
+      onboardingDate.getMonth() !== currentMonth && // Exclude current month
+      onboardingDate >= new Date(currentYear, currentMonth - 6, 1) && // 6 months ago
+      onboardingDate <= new Date(currentYear, currentMonth, 0) // Last day of the previous month
+    );
   });
 
   const monthCounts = recentDrivers.reduce((acc, driver) => {
@@ -85,17 +84,11 @@ export function calculateSixMonthDrivers(drivers) {
     return acc;
   }, {});
 
-  // Convert counts to sorted array of results
-  const sortedResults = Object.entries(monthCounts)
-    .sort(([monthA], [monthB]) => {
-      const [mA, yA] = monthA.split("-");
-      const [mB, yB] = monthB.split("-");
-      return (
-        new Date(`${yA}-${months.indexOf(mA) + 1}-01`) -
-        new Date(`${yB}-${months.indexOf(mB) + 1}-01`)
-      );
-    })
-    .map(([month, count]) => ({ month, count }));
+  // Ensure all months in the range are included, even with a count of 0
+  const finalResults = monthRange.map((month) => ({
+    month,
+    count: monthCounts[month] || 0,
+  }));
 
-  return sortedResults;
+  return finalResults;
 }

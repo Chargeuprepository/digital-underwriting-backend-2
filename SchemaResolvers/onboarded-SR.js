@@ -52,7 +52,7 @@ export const onboardedResolvers = {
       let { limit = 20, offset = 0, credit, risk, karma, searchId } = input;
 
       const cachedFilteredCombinationData = await redisClient.get(
-        `CREDIT_${credit}_RISK_${risk}_KARMA_${karma}`
+        `CREDIT_${credit}_RISK_${risk}_KARMA_${karma}_${searchId}`
       );
       const response = JSON.parse(cachedFilteredCombinationData);
 
@@ -103,7 +103,7 @@ export const onboardedResolvers = {
           gettingGoogleSheetDataInfo = onboardedData.gettingGoogleSheetDataInfo;
 
           await redisClient.setEx(
-            `CREDIT_${credit}_RISK_${risk}_KARMA_${karma}`,
+            `CREDIT_${credit}_RISK_${risk}_KARMA_${karma}_${searchId}`,
             3600 * 24,
             JSON.stringify(driverData)
           );

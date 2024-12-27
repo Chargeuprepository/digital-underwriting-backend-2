@@ -1,6 +1,9 @@
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
-import { typeDefs, resolvers } from "./SchemaResolvers/Parent-SRs/Parent-SR.js";
+import {
+  typeDefs,
+  resolvers,
+} from "./SchemaResolvers/ParentFolder-SRs/Parent-SR.js";
 import redisClient from "./redisClient.js";
 import dotenv from "dotenv";
 

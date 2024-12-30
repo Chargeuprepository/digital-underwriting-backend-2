@@ -6,12 +6,15 @@ import {
 } from "./SchemaResolvers/ParentFolder-SRs/Parent-SR.js";
 import redisClient from "./redisClient.js";
 import dotenv from "dotenv";
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
 
 dotenv.config();
 
 const startServer = async () => {
   try {
-    const app = express();
     const server = new ApolloServer({
       typeDefs,
       resolvers,

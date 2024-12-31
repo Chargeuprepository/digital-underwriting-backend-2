@@ -7,9 +7,13 @@ module.exports = {
       exec_mode: "cluster", // Use "fork" for a single instance or "cluster" for multi-instance
       env: {
         NODE_ENV: "development",
+        PORT: 4000, // Add the desired port
+        HOST: "0.0.0.0", // Bind to all network interfaces
       },
       env_production: {
         NODE_ENV: "production",
+        PORT: 4000, // Ensure the same port is used in production
+        HOST: "0.0.0.0", // Bind to all network interfaces
       },
     },
   ],

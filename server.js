@@ -68,7 +68,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
-// Middleware to force HTTPS redirect
+// Middleware to force HTTPS redirect (ensure this is at the top)
 app.use((req, res, next) => {
   if (!req.secure) {
     return res.redirect(`https://${req.headers.host}${req.url}`);

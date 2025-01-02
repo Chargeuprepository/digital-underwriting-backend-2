@@ -52,6 +52,8 @@
 // });
 
 import express from "express";
+import https from "https";
+import fs from "fs";
 import { ApolloServer } from "apollo-server-express";
 import {
   typeDefs,
@@ -60,31 +62,18 @@ import {
 import redisClient from "./redisClient.js";
 import dotenv from "dotenv";
 import cors from "cors";
-import fs from "fs";
-import https from "https";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 
-dotenv.config();
-
-// Load SSL certificates
-const sslOptions = {
-  key: fs.readFileSync(
-    "/etc/letsencrypt/live/underwrite.echargeup.com/privkey.pem"
-  ),
-  cert: fs.readFileSync(
-    "/etc/letsencrypt/live/underwrite.echargeup.com/fullchain.pem"
-  ),
-};
-
-// Redirect HTTP to HTTPS
-const http = express();
-http.use((req, res) => {
-  res.redirect(`https://${req.headers.host}${req.url}`);
-});
-http.listen(80, () => {
-  console.log("Redirecting HTTP traffic to HTTPS...");
+// Middleware to force HTTPS redirect
+app.use((req, res, next) => {
+  if (!req.secure) {
+    return res.redirect(`https://${req.headers.host}${req.url}`);
+  }
+  next();
 });
 
 const startServer = async () => {
@@ -100,28 +89,31 @@ const startServer = async () => {
     await server.start();
     server.applyMiddleware({ app });
 
+    // Load SSL certificates
+    const privateKey = fs.readFileSync(
+      "/etc/letsencrypt/live/underwrite.echargeup.com/privkey.pem",
+      "utf8"
+    );
+    const certificate = fs.readFileSync(
+      "/etc/letsencrypt/live/underwrite.echargeup.com/cert.pem",
+      "utf8"
+    );
+    const ca = fs.readFileSync(
+      "/etc/letsencrypt/live/underwrite.echargeup.com/chain.pem",
+      "utf8"
+    );
+
+    const credentials = { key: privateKey, cert: certificate, ca };
+
     // Start HTTPS server
-    https.createServer(sslOptions, app).listen(443, () => {
-      console.log(
-        `🚀 Server ready at https://underwrite.echargeup.com${server.graphqlPath}`
-      );
+    const httpsServer = https.createServer(credentials, app);
+    httpsServer.listen(443, () => {
+      console.log("🚀 Server is running on https://underwrite.echargeup.com");
     });
   } catch (error) {
     console.error("Critical server error:", error);
-    process.exit(1); // Exit process so it can restart
+    process.exit(1);
   }
 };
 
-// Start the server
 startServer();
-
-// Global process error handlers
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-  process.exit(1); // Exit process on critical error
-});
-
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  process.exit(1); // Exit process on critical promise rejection
-});

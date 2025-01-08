@@ -10,10 +10,11 @@ import cors from "cors";
 
 const app = express();
 app.use(
-  cors({
-    origin: "https://underwrite.echargeup.com", // Frontend domain
-    credentials: true, // Allow cookies if needed
-  })
+  cors()
+  //   {
+  //   origin: "https://underwrite.echargeup.com", // Frontend domain
+  //   credentials: true, // Allow cookies if needed
+  // }
 );
 app.set("trust proxy", true);
 

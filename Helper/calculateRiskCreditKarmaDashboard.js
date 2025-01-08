@@ -79,7 +79,7 @@ export function calculateRiskCreditKarmaDashboard(drivers) {
     const totalActiveDriversLength = activeDrivers.length;
     for (const key in categories) {
       categories[key] =
-        ((categories[key] / totalActiveDriversLength) * 100).toFixed(2) + "%";
+        Math.ceil((categories[key] / totalActiveDriversLength) * 100) + "%";
     }
 
     return categories;

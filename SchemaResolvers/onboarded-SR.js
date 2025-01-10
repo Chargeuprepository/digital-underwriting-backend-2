@@ -86,13 +86,18 @@ export const onboardedResolvers = {
             row.avgDpd = Number(data[i].avgDPD).toFixed(2);
             row.service = data[i].service;
             row.runKm = Number(data[i].runKm).toFixed(0);
-            row.nps = Number(data[i].NPS).toFixed(0);
-            row.karma = data[i].karmaScore.toFixed(0);
+            (row.nps =
+              Number(data[i].NPS) === "0"
+                ? "-"
+                : Number(data[i].NPS).toFixed(0)),
+              (row.karma = data[i].karmaScore.toFixed(0));
             row.credit = Number(data[i].creditScore);
             row.risk = Number(data[i].riskScore).toFixed(0);
 
             onboardedManipulatedData.push(row);
           }
+
+          console.log(onboardedManipulatedData);
 
           // 3. Structuring the data accordingly
           driverData.onboardedManipulatedData = onboardedManipulatedData.sort(

@@ -160,7 +160,7 @@ export const driverResolvers = {
           return dayDiff;
         }
         function toFix(value, fix = 0) {
-          return value !== "" && value.toFixed(fix);
+          return value !== "" ? value.toFixed(fix) : "";
         }
 
         const driverManipulatedData = {
@@ -172,8 +172,9 @@ export const driverResolvers = {
             runKm: toFix(driverData.runKm),
             lossDays: driverData.lossDays,
             karmaScore: driverData.karmaScore,
-            nps: toFix(driverData.NPS),
-            avgDpd: toFix(driverData.avgDPD),
+            nps: toFix(driverData.NPS) === "0" ? "-" : toFix(driverData.NPS),
+            avgDpd:
+              toFix(driverData.avgDPD) === "" ? "-" : toFix(driverData.avgDPD),
             aon: ageOnNetwork(driverData.Onboarding_Date),
           },
           personalInformation: {

@@ -87,9 +87,7 @@ export const onboardedResolvers = {
             row.service = data[i].service;
             row.runKm = Number(data[i].runKm).toFixed(0);
             (row.nps =
-              Number(data[i].NPS) === "0"
-                ? "-"
-                : Number(data[i].NPS).toFixed(0)),
+              data[i].NPS === 0 ? "-" : Number(data[i].NPS).toFixed(0)),
               (row.karma = data[i].karmaScore.toFixed(0));
             row.credit = Number(data[i].creditScore);
             row.risk = Number(data[i].riskScore).toFixed(0);
@@ -97,7 +95,7 @@ export const onboardedResolvers = {
             onboardedManipulatedData.push(row);
           }
 
-          console.log(onboardedManipulatedData);
+          console.log(typeof data[0].NPS);
 
           // 3. Structuring the data accordingly
           driverData.onboardedManipulatedData = onboardedManipulatedData.sort(

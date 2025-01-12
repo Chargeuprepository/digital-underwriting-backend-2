@@ -3,8 +3,8 @@ import { calculateRiskCreditKarmaDashboard } from "../Helper/calculateRiskCredit
 import { calculateRunKm } from "../Helper/calculateRunKm.js";
 import { calculateSixMonthDrivers } from "../Helper/calculateSixMonthDrivers.js";
 import { calculateEMITrends } from "../Helper/calculateEMITrends.js";
-import { calculateChurnedDrivers } from "../Helper/calculateChurnedDrivers.js";
 import sheetCallRedis from "../RedisActions/sheetCallRedis.js";
+import calculateNPS from "../Helper/calculateNPS.js";
 
 export const dashboardTypeDefs = gql`
   type Query {
@@ -34,7 +34,7 @@ export const dashboardTypeDefs = gql`
     riskCreditkarmaData: RiskCreditkarmaData
     lastSixMonthDrivers: [MonthAndCount]
     emiTrendsData: EmiTrendsData
-    churnedDriversData: [ChurnedDriversData]
+    driverNPS: [Int]
   }
 
   type RunKmMonthData {
@@ -82,10 +82,6 @@ export const dashboardTypeDefs = gql`
     value: Float
     name: String
   }
-  type ChurnedDriversData {
-    month: String
-    count: Float
-  }
 `;
 
 export const dashboardResolvers = {
@@ -105,7 +101,7 @@ export const dashboardResolvers = {
             calculateRiskCreditKarmaDashboard(driversWithCredit),
           lastSixMonthDrivers: calculateSixMonthDrivers(dashboardData.data),
           emiTrendsData: calculateEMITrends(dashboardData.data),
-          churnedDriversData: calculateChurnedDrivers(dashboardData.data),
+          driverNPS: calculateNPS(dashboardData.data),
         };
 
         return {

@@ -95,8 +95,6 @@ export const onboardedResolvers = {
             onboardedManipulatedData.push(row);
           }
 
-          console.log(typeof data[0].NPS);
-
           // 3. Structuring the data accordingly
           driverData.onboardedManipulatedData = onboardedManipulatedData.sort(
             (a, b) => b.credit - a.credit
